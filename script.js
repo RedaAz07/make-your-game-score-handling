@@ -5,10 +5,18 @@ function GameLoop() {
     const bricksContainer = document.getElementById("bricksContainer")
     const timeValue = document.querySelector(".time-value")
 
-    let brickesrow = 6
-    let brickescol = 10
-    let brickeswidth = 52
-    let brickesheight = 15
+
+
+    const brick = {
+
+        brickesrow: 6,
+        brickescol: 10,
+        brickeswidth: 52,
+        brickesheight: 15,
+        brickesColor: ["brick-red", "brick-orange", "brick-yellow", "brick-green", "brick-blue", "brick-purple"]
+    }
+    const bricksPositions = []
+
     const time = {
         interval: null,
         sec: 0,
@@ -27,14 +35,14 @@ function GameLoop() {
     }
 
 
-    let brickesColor = ["brick-red", "brick-orange", "brick-yellow", "brick-green", "brick-blue", "brick-purple"]
 
 
-    createbrickes(brickesrow, brickescol, brickeswidth, brickesheight, brickesColor, bricksContainer)
+    createbrickes(brick, bricksContainer, bricksPositions)
 
 
 
 
+    console.log(bricksPositions);
 
 
 
@@ -63,19 +71,27 @@ function GameLoop() {
 
 
 
-function createbrickes(brickesrow, brickescol, brickeswidth, brickesheight, brickesColor, bricksContainer) {
+function createbrickes(brick, bricksContainer, bricksPositions) {
 
 
-    for (let row = 0; row < brickesrow; row++) {
-        for (let col = 0; col < brickescol; col++) {
+    for (let row = 0; row < brick.brickesrow; row++) {
+        for (let col = 0; col < brick.brickescol; col++) {
 
 
             const div =
                 document.createElement("div")
-            div.classList = `brick ${brickesColor[row]}`
-            div.style.width = `${brickeswidth}px`
-            div.style.height = `${brickesheight}px`
+            div.classList = `brick ${brick.brickesColor[row]}`
+            div.style.width = `${brick.brickeswidth}px`
+            div.style.height = `${brick.brickesheight}px`
+
             bricksContainer.appendChild(div)
+            let position = div.getBoundingClientRect()
+            bricksPositions.push({
+                brickX: position.x,
+                bricky: position.y,
+                brickeswidth: brick.brickeswidth,
+                brickesheight: brick.brickesheight,
+            })
 
         }
     }
