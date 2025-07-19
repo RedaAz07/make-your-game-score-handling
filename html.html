@@ -1,54 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Breakout Game</title>
 </head>
 <link rel="stylesheet" href="style.css">
-<body>
-    <div class="game-container">
-        <h1 class="game-title">🧱 BRICK BREAKER 🧱</h1>
-        
-        <div class="header">
-            <div class="score-lives">
-                <div class="score">
-                    <span class="trophy">🏆</span>
-                    <span>SCORE:</span>
-                    <span class="score-value">0</span>
-                </div>
-                <div class="lives">
-                    <span class="heart">❤️</span>
-                    <span>LIVES:</span>
-                    <span class="lives-value">3</span>
-                </div>
-            </div>
-            
-            <div class="controls">
-                <button class="btn pause-btn" id="pauseBtn">
-                    <span class="pause-icon">⏸️</span>
-                    PAUSE
-                </button>
-                <button class="btn music-btn" id="musicBtn">
-                    <span class="music-icon">🎵</span>
-                    MUSIC
-                </button>
-            </div>
-        </div>
 
-        <div class="game-area" id="gameArea">
-            <div class="game-message" id="gameMessage">
-                <div>Click to Start!</div>
-                <div class="start-message">Move mouse to control paddle</div>
-            </div>
-            
-            <div class="bricks-container" id="bricksContainer">
-            </div>
-            
-            <div class="ball" id="ball"></div>
-            <div class="paddle" id="paddle"></div>
-        </div>
-    </div>
+<body>
+    <div id="game-container" class="game-container"></div>
+    <script src="script/build.js"></script>
+    <script src="script/game.js"></script>
 </body>
-<script src="script.js"></script>
+
 </html>
