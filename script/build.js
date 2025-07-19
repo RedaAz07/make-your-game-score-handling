@@ -2,7 +2,9 @@ let container = document.getElementById("game-container")
 let colors = ["red", "orange", "yellow", "green", "blue", "purple"]
 let rightPressed = false;
 let leftPressed = false;
-let paddleX = 300;
+let paddleX = container.offsetWidth/2;
+let ballX = container.offsetWidth/2
+let ballY = container.offsetHeight - 30
 const Createelements = () => {
     let containerbricks = document.createElement("div")
     let paddle = document.createElement("div")
@@ -56,25 +58,15 @@ const Createelements = () => {
 Createelements()
 
 let paddle = document.querySelector('.paddle')
-
-
-
-
-
 document.body.addEventListener('keydown', (event) => {
-    console.log(event.key);
-
     if (event.key === "ArrowRight") {
         rightPressed = true
     } else if (event.key === "ArrowLeft") {
         leftPressed = true
     }
-
 });
 
 document.body.addEventListener('keyup', (event) => {
-
-
     if (event.key === "ArrowRight") {
         rightPressed = false
 
@@ -82,10 +74,11 @@ document.body.addEventListener('keyup', (event) => {
         leftPressed = false
     }
 });
-function movePaddle() {
-    const containerWidth = container.offsetWidth;
-    const paddleWidth = paddle.offsetWidth;
 
+function movepaddle() {
+    let brick_container = document.querySelector('.bricks-container')
+    const paddleWidth = paddle.offsetWidth;
+    const containerWidth = brick_container.offsetWidth
 
 
     if (rightPressed) {
@@ -93,11 +86,34 @@ function movePaddle() {
     } else if (leftPressed) {
         paddleX -= 6;
     }
-
-    paddleX = Math.max(54, Math.min(paddleX, containerWidth - paddleWidth - 4));
+    if (paddleX < 0) {
+        paddleX = 0
+    }
+    if (paddleX > containerWidth - paddleWidth) {
+        paddleX = containerWidth - paddleWidth;
+    }
 
     paddle.style.left = `${paddleX}px`;
-    requestAnimationFrame(movePaddle);
 }
 
-movePaddle();
+let ball = document.querySelector(".ball")
+function moveball() {
+    ballX += 6;
+    ballY -= 6;
+
+    ball.style.left = `${ballX}px`
+    ball.style.top = `${ballY}px`
+}
+
+function gameloop() {
+    movepaddle()
+    moveball()
+    requestAnimationFrame(gameloop);
+}
+
+// document.body.addEventListener("keydown", (e) => {
+//     if (e.key == " ") {
+//         gameloop()
+//     }
+// })
+gameloop()
