@@ -4,6 +4,8 @@ function GameLoop() {
     const gameMessage = document.getElementById("gameMessage")
     const bricksContainer = document.getElementById("bricksContainer")
     const timeValue = document.querySelector(".time-value")
+    const container = document.getElementById("gameArea")
+
 
 
 
@@ -64,9 +66,33 @@ function GameLoop() {
         }
     })
 
+    const Pressed = {
+        rightPressed: false,
+        leftPressed: false,
+        paddleX: container.offsetWidth / 2
+    }
+
+    document.body.addEventListener('keydown', (event) => {
+        if (event.key === "ArrowRight") {
+            Pressed.rightPressed = true
+        } else if (event.key === "ArrowLeft") {
+            Pressed.leftPressed = true
+        }
+    });
+
+    document.body.addEventListener('keyup', (event) => {
+        if (event.key === "ArrowRight") {
+            Pressed.rightPressed = false
+
+        } else if (event.key === "ArrowLeft") {
+            Pressed.leftPressed = false
+        }
+    });
 
 
 
+/*     movepaddle(Pressed, paddle, paddleX)
+ */    loop(Pressed, paddle)
 }
 
 
@@ -85,10 +111,9 @@ function createbrickes(brick, bricksContainer, bricksPositions) {
             div.style.height = `${brick.brickesheight}px`
 
             bricksContainer.appendChild(div)
-            let position = div.getBoundingClientRect()
             bricksPositions.push({
-                brickX: position.x,
-                bricky: position.y,
+                brickX: 20 + 3 * col + col * brick.brickeswidth,
+                bricky: 20 + 3 * row + row * brick.brickesheight,
                 brickeswidth: brick.brickeswidth,
                 brickesheight: brick.brickesheight,
             })
@@ -121,6 +146,38 @@ function Pause(gameMessage) {
     gameMessage.style.display = "block"
 
 }
+function movepaddle(Pressed, paddle) {
+    let brick_container = document.querySelector('.bricks-container')
+    const paddleWidth = paddle.offsetWidth;
+    const containerWidth = brick_container.offsetWidth
+
+
+    if (Pressed.rightPressed) {
+        Pressed.paddleX += 6;
+    } else if (Pressed.leftPressed) {
+        Pressed.paddleX -= 6;
+    }
+    if (Pressed.paddleX < 0) {
+        Pressed.paddleX = 0
+    }
+    if (Pressed.paddleX > containerWidth - paddleWidth) {
+        Pressed.paddleX = containerWidth - paddleWidth;
+    }
+
+    paddle.style.left = `${Pressed.paddleX}px`;
+}
 GameLoop()
+
+
+function loop(Pressed, paddle) {
+    movepaddle(Pressed, paddle,)
+  /*   draw(ball, ballDive);
+    movepaddle() */
+/*     update(ball, paddle, bricksPositions, cvs);
+ */    requestAnimationFrame(() =>
+        loop(Pressed, paddle)
+    );
+}
+
 
 
