@@ -9,7 +9,36 @@
 <link rel="stylesheet" href="style.css">
 
 <body>
-    <div id="game-container" class="game-container"></div>
+    <div class="stars-background" id="starsBackground"></div>
+    <div id="game-container" class="game-container">
+        <div class="intro" id="intro"></div>
+        <h1 class="game-title">🧱 BRICK BREAKER 🧱</h1>
+        <div class="header">
+            <div class="score-lives">
+                <div class="score">
+                    <span class="trophy">🏆</span>
+                    <span>SCORE:</span>
+                    <span class="score-value">0</span>
+                </div>
+                <div class="lives">
+                    <span class="heart">❤️</span>
+                    <span>LIVES:</span>
+                    <span class="lives-value">3</span>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="btn pause-btn" id="pauseBtn">
+                    <span class="pause-icon">⏸️</span>
+                    PAUSE
+                </button>
+                <button class="btn music-btn" id="musicBtn">
+                    <span class="music-icon">🎵</span>
+                    MUSIC
+                </button>
+            </div>
+        </div>
+        <div class="game-area" id="gameArea"></div>
+    </div>
     <script src="script/build.js"></script>
     <script src="script/game.js"></script>
 </body>
