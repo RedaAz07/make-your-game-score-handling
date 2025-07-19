@@ -1,19 +1,25 @@
 function GameLoop() {
   const ballDive = document.getElementById("ball");
   const paddleDive = document.getElementById("paddle");
-  const gameMessage = document.getElementById("gameMessage");
+  // const gameMessage = document.getElementById("gameMessage");
   const bricksContainer = document.getElementById("bricksContainer");
-  const timeValue = document.querySelector(".time-value");
-  //const container = document.getElementById("gameArea");
+  // const timeValue = document.querySelector(".time-value");
+  const container = document.getElementById("gameArea");
+  let cursors = {
+    rightPressed: false,
+    leftPressed: false
+  }
+
   const cvs = {
-    width: 606,
-    height: 506,
+    width: container.offsetWidth,
+    height: container.offsetHeight,
   };
   const paddle = {
-    x: 263,
-    y: 456,
-    width: 84,
-    height: 15,
+    element: paddleDive,
+    x: container.offsetWidth / 2 - paddleDive.offsetWidth / 2,
+    y: container.offsetHeight - 30,
+    width: paddleDive.offsetWidth,
+    height: paddleDive.offsetHeight,
   };
   const BALL_RADIUS = 8;
   const ball = {
@@ -26,8 +32,8 @@ function GameLoop() {
   };
   const brick = {
     brickesrow: 6,
-    brickescol: 10,
-    brickeswidth: 54,
+    brickescol: 5,
+    brickeswidth: 102,
     brickesheight: 25,
     brickesColor: [
       "brick-red",
@@ -41,17 +47,56 @@ function GameLoop() {
   const bricksPositions = [];
 
   createbrickes(brick, bricksContainer, bricksPositions);
-  console.log(bricksPositions);
+  document.body.addEventListener('keydown', (event) => {
+    if (event.key === "ArrowRight") {
+      cursors.rightPressed = true
+    } else if (event.key === "ArrowLeft") {
+      cursors.leftPressed = true
+    }
+  });
 
-  loop(ball, paddle, bricksPositions, cvs, ballDive);
+  document.body.addEventListener('keyup', (event) => {
+    if (event.key === "ArrowRight") {
+      cursors.rightPressed = false
+
+    } else if (event.key === "ArrowLeft") {
+      cursors.leftPressed = false
+    }
+  });
+  loop(ball, paddle, bricksPositions, cvs, ballDive, cursors);
 }
-function loop(ball, paddle, bricksPositions, cvs, ballDive) {
-  draw(ball, ballDive);
+function loop(ball, paddle, bricksPositions, cvs, ballDive, cursors) {
+  movepaddle(paddle, cursors)
+  draw(ball, ballDive, paddle);
 
   update(ball, paddle, bricksPositions, cvs);
   requestAnimationFrame(() =>
-    loop(ball, paddle, bricksPositions, cvs, ballDive)
+    loop(ball, paddle, bricksPositions, cvs, ballDive, cursors)
   );
+}
+
+
+function movepaddle(paddle, cursors) {
+  let brick_container = document.querySelector('.bricks-container')
+  
+  const paddleWidth = paddle.width;
+  const containerWidth = brick_container.offsetWidth
+  console.log(cursors.rightPressed);
+
+
+  if (cursors.rightPressed) {
+    paddle.x += 6
+  } else if (cursors.leftPressed) {
+    paddle.x -= 6;
+  }
+  if (paddle.x < 0) {
+    paddle.x = 0
+  }
+  if (paddle.x > containerWidth - paddleWidth) {
+    paddle.x = containerWidth - paddleWidth;
+  }
+
+
 }
 
 function createbrickes(brick, bricksContainer, bricksPositions) {
@@ -69,8 +114,8 @@ function createbrickes(brick, bricksContainer, bricksPositions) {
       bricksPositions.push({
         id: count,
         element: div,
-        x: col * (3 + brick.brickeswidth) + 20,
-        y: row * (3 + brick.brickesheight) + 20,
+        x: col * (10 + brick.brickeswidth) + 25,
+        y: row * (10 + brick.brickesheight) + 25,
         brickeswidth: brick.brickeswidth,
         brickesheight: brick.brickesheight,
         status: true,
@@ -90,10 +135,10 @@ function update(ball, paddle, bricksPositions, cvs) {
   ball.y += ball.dy;
 }
 
-function draw(ball, divBall) {
-  divBall.style.transform = `translate(${ball.x + ball.dx}px,${
-    ball.y + ball.dy
-  }px)`;
+function draw(ball, divBall, paddle) {
+  divBall.style.transform = `translate(${ball.x + ball.dx}px,${ball.y + ball.dy
+    }px)`;
+  paddle.element.style.transform = `translate(${paddle.x}px)`
 }
 
 function resetBall(ball, paddle, cvs) {
