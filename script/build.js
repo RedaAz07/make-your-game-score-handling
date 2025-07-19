@@ -8,7 +8,7 @@ let pauseIcon = document.getElementById("pauseBtn");
 let timeValue = document.querySelector('.time-value');
 intro.classList.add("image")
 gameMessage.className = "gameMessage"
-gameMessage.innerHTML="Press Space to Start"
+gameMessage.innerHTML = "Press Space to Start"
 document.body.appendChild(gameMessage)
 let restLifes = 3
 let scoree = 0
@@ -67,13 +67,6 @@ ballX = gameArea.offsetWidth / 2;
 ballY = gameArea.offsetHeight - 60;
 
 document.body.addEventListener('keydown', (event) => {
-    if (event.key === "ArrowRight") {
-        rightPressed = true;
-    } else if (event.key === "ArrowLeft") {
-        leftPressed = true;
-    }
-});
-document.body.addEventListener('keyup', (event) => {
     if (event.key === " ") {
         if (gameState.gameOver && gameState.gamePause) {
             restart();
@@ -93,6 +86,13 @@ document.body.addEventListener('keyup', (event) => {
             Pause(gameMessage, gameState);
         }
     } else if (event.key === "ArrowRight") {
+        rightPressed = true;
+    } else if (event.key === "ArrowLeft") {
+        leftPressed = true;
+    }
+});
+document.body.addEventListener('keyup', (event) => {
+    if (event.key === "ArrowRight") {
         rightPressed = false;
     } else if (event.key === "ArrowLeft") {
         leftPressed = false;
@@ -262,5 +262,26 @@ function gameloop() {
     moveball();
     requestAnimationFrame(gameloop);
 }
+function generateStars(count = 100) {
+    const container = document.getElementById("starsBackground");
+    const colors = ["#ffffff", "#ccc", "#aaffff", "#ffe0ff"];
+
+    for (let i = 0; i < count; i++) {
+        const star = document.createElement("div");
+        const size = Math.random() * 2 + 1;
+
+        star.classList.add("star");
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.backgroundColor =
+            colors[Math.floor(Math.random() * colors.length)];
+        star.style.animationDuration = `${10 + Math.random() * 20}s`;
+
+        container.appendChild(star);
+    }
+}
 
 gameloop();
+generateStars(300)
