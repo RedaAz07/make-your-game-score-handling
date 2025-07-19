@@ -1,15 +1,65 @@
 function GameLoop() {
+  const introScreen = document.getElementById("introScreen");
   const ballDive = document.getElementById("ball");
   const paddleDive = document.getElementById("paddle");
-  // const gameMessage = document.getElementById("gameMessage");
+  const gameMessage = document.getElementById("gameMessage");
   const bricksContainer = document.getElementById("bricksContainer");
-  // const timeValue = document.querySelector(".time-value");
+  const timeValue = document.querySelector(".time-value");
   const container = document.getElementById("gameArea");
+  const pauseIcon = document.querySelector(".pause-icon");
+  const continueBtn = document.getElementById("continueBtn");
+  const restartBtn = document.getElementById("restartBtn");
+  const pauseBtn = document.getElementById("pauseBtn");
+  const scoreValue = document.querySelector(".score-value");
+  const lifeValue = document.querySelector(".lives-value");
+
+  introScreen.classList.add("image");
+  let toggle = 0;
+  pauseBtn.addEventListener("click", () => {
+    if (toggle === 0) {
+      pauseIcon.innerHTML = "▶️ Continue";
+      Pause(gameMessage);
+      gameState.gameStart = false;
+      gameState.gamePause = true;
+      toggle++;
+    } else {
+      pauseIcon.innerHTML = "⏸️ pause";
+      start(gameMessage);
+      gameState.gameStart = true;
+      gameState.gamePause = false;
+      toggle = 0;
+    }
+  });
+
+  continueBtn.addEventListener("click", () => {
+    pauseIcon.innerHTML = "⏸️ pause";
+    gameState.gameStart = true;
+    gameState.gamePause = false;
+    start(gameMessage);
+  });
+
+  restartBtn.addEventListener("click", () => {
+    gameState.gameStart = false;
+    gameState.gamePause = false;
+    Restart(
+      brick,
+      bricksContainer,
+      bricksPositions,
+      time,
+      paddle,
+      ball,
+      ballDive,
+      timeValue,
+      container,
+      dakchi
+    );
+  });
+
+  // paddel
   let cursors = {
     rightPressed: false,
-    leftPressed: false
-  }
-
+    leftPressed: false,
+  };
   const cvs = {
     width: container.offsetWidth,
     height: container.offsetHeight,
@@ -23,13 +73,26 @@ function GameLoop() {
   };
   const BALL_RADIUS = 8;
   const ball = {
-    x: cvs.width / 2 - BALL_RADIUS,
-    y: paddle.y - BALL_RADIUS,
+    x: container.offsetWidth / 2 - paddleDive.offsetWidth / 2,
+    y: container.offsetHeight - 60,
     radius: BALL_RADIUS,
     speed: 3,
     dx: 3,
     dy: -3,
   };
+  const time = {
+    interval: null,
+    sec: 0,
+    min: 0,
+  };
+  const gameState = {
+    gameStart: false,
+    gamePause: false,
+  };
+  if (!gameState.gameStart || gameState.gamePause) {
+    gameMessage.style.display = "block";
+  }
+
   const brick = {
     brickesrow: 6,
     brickescol: 5,
@@ -45,58 +108,169 @@ function GameLoop() {
     ],
   };
   const bricksPositions = [];
-
   createbrickes(brick, bricksContainer, bricksPositions);
-  document.body.addEventListener('keydown', (event) => {
-    if (event.key === "ArrowRight") {
-      cursors.rightPressed = true
+  // keydown listener
+  document.body.addEventListener("keydown", (event) => {
+    if (event.key === " " || event.key == "Escape" || event.key == "p") {
+      if (!gameState.gameStart) {
+        introScreen.classList.add("hidden");
+        pauseIcon.innerHTML = "⏸️ pause";
+        gameState.gameStart = true;
+        gameState.gamePause = false;
+        start(gameMessage);
+        creatTime(timeValue, time, gameState);
+      } else {
+        pauseIcon.innerHTML = "▶️ Continue";
+
+        gameState.gamePause = true;
+        gameState.gameStart = false;
+        creatTime(timeValue, time, gameState);
+        Pause(gameMessage, gameState);
+      }
+    } else if (event.key === "ArrowRight") {
+      cursors.rightPressed = true;
     } else if (event.key === "ArrowLeft") {
-      cursors.leftPressed = true
+      cursors.leftPressed = true;
     }
   });
 
-  document.body.addEventListener('keyup', (event) => {
+  document.body.addEventListener("keyup", (event) => {
     if (event.key === "ArrowRight") {
-      cursors.rightPressed = false
-
+      cursors.rightPressed = false;
     } else if (event.key === "ArrowLeft") {
-      cursors.leftPressed = false
+      cursors.leftPressed = false;
     }
   });
-  loop(ball, paddle, bricksPositions, cvs, ballDive, cursors);
-}
-function loop(ball, paddle, bricksPositions, cvs, ballDive, cursors) {
-  movepaddle(paddle, cursors)
-  draw(ball, ballDive, paddle);
 
-  update(ball, paddle, bricksPositions, cvs);
-  requestAnimationFrame(() =>
-    loop(ball, paddle, bricksPositions, cvs, ballDive, cursors)
+  const dakchi = {
+    lifes: 3,
+    score: 0,
+    scoreValue: scoreValue,
+    lifeValue: lifeValue,
+  };
+
+  loop(
+    ball,
+    paddle,
+    bricksPositions,
+    cvs,
+    ballDive,
+    cursors,
+    gameState,
+    dakchi
   );
 }
 
+function loop(
+  ball,
+  paddle,
+  bricksPositions,
+  cvs,
+  ballDive,
+  cursors,
+  gameState,
+  dakchi
+) {
+  if (gameState.gameStart) {
+    movepaddle(paddle, cursors);
+    draw(ball, ballDive, paddle, dakchi);
+
+    update(ball, paddle, bricksPositions, cvs, dakchi);
+  }
+  requestAnimationFrame(() =>
+    loop(
+      ball,
+      paddle,
+      bricksPositions,
+      cvs,
+      ballDive,
+      cursors,
+      gameState,
+      dakchi
+    )
+  );
+}
+function creatTime(timeValue, time, gameState) {
+  if (gameState.gameStart && time.interval === null) {
+    time.interval = setInterval(() => {
+      time.sec++;
+      if (time.sec === 60) {
+        time.min++;
+        time.sec = 0;
+      }
+      timeValue.innerHTML = `${String(time.min).padStart(2, "0")}:${String(
+        time.sec
+      ).padStart(2, "0")}`;
+    }, 1000);
+  } else if (gameState.gamePause) {
+    clearInterval(time.interval);
+    time.interval = null;
+  }
+}
+
+// start  handler
+function start(gameMessage) {
+  gameMessage.style.display = "none";
+}
+// pause handler
+function Pause(gameMessage) {
+  gameMessage.style.display = "block";
+}
+
+function Restart(
+  brick,
+  bricksContainer,
+  bricksPositions,
+  time,
+  paddle,
+  ball,
+  ballDive,
+  timeValue,
+  container,
+  dakchi
+) {
+  bricksContainer.innerHTML = "";
+  bricksPositions.length = 0;
+  dakchi.scoreValue.innerHTML = 0;
+  dakchi.score = 0;
+  dakchi.lifes = 3;
+  createbrickes(brick, bricksContainer, bricksPositions);
+
+  paddle.x = container.offsetWidth / 2 - paddle.width / 2;
+  paddle.element.style.transform = `translate(${paddle.x}px)`;
+
+  ball.x = container.offsetWidth / 2 - ball.radius;
+  ball.y = paddle.y - ball.radius;
+  ball.dx = 3;
+  ball.dy = -3;
+  ball.speed = 3;
+  ballDive.style.transform = `translate(${ball.x}px, ${ball.y}px)`;
+
+  clearInterval(time.interval);
+  time.interval = null;
+  time.sec = 0;
+  time.min = 0;
+  timeValue.innerHTML = "00:00";
+}
 
 function movepaddle(paddle, cursors) {
-  let brick_container = document.querySelector('.bricks-container')
-  
+  let brick_container = document.querySelector(".bricks-container");
+
   const paddleWidth = paddle.width;
-  const containerWidth = brick_container.offsetWidth
+  const containerWidth = brick_container.offsetWidth;
   console.log(cursors.rightPressed);
 
-
   if (cursors.rightPressed) {
-    paddle.x += 6
+    paddle.x += 6;
   } else if (cursors.leftPressed) {
     paddle.x -= 6;
   }
   if (paddle.x < 0) {
-    paddle.x = 0
+    paddle.x = 0;
   }
   if (paddle.x > containerWidth - paddleWidth) {
     paddle.x = containerWidth - paddleWidth;
   }
-
-
 }
 
 function createbrickes(brick, bricksContainer, bricksPositions) {
@@ -126,19 +300,27 @@ function createbrickes(brick, bricksContainer, bricksPositions) {
 }
 
 GameLoop();
+generateStars(300);
 
-function update(ball, paddle, bricksPositions, cvs) {
+function update(ball, paddle, bricksPositions, cvs, dakchi) {
   ballPaddleCollision(ball, paddle);
-  ballWallCollision(ball, paddle, cvs);
-  ballBrikCollision(ball, bricksPositions);
+  ballWallCollision(ball, paddle, cvs, dakchi);
+  ballBrikCollision(ball, bricksPositions, dakchi);
   ball.x += ball.dx;
   ball.y += ball.dy;
 }
 
-function draw(ball, divBall, paddle) {
-  divBall.style.transform = `translate(${ball.x + ball.dx}px,${ball.y + ball.dy
-    }px)`;
-  paddle.element.style.transform = `translate(${paddle.x}px)`
+function draw(ball, divBall, paddle, dakchi) {
+  dakchi.scoreValue.innerHTML = dakchi.score;
+
+  dakchi.lifeValue.innerHTML = dakchi.lifes;
+
+  divBall.style.transform = `translate(${ball.x + ball.dx}px,${
+    ball.y + ball.dy
+  }px)`;
+  console.log(paddle.x);
+
+  paddle.element.style.transform = `translate(${paddle.x}px)`;
 }
 
 function resetBall(ball, paddle, cvs) {
@@ -174,7 +356,7 @@ function ballPaddleCollision(ball, paddle) {
     ball.dx *= -1;
   }
 }
-function ballWallCollision(ball, paddle, cvs) {
+function ballWallCollision(ball, paddle, cvs, dakchi) {
   if (ball.x + ball.radius >= cvs.width || ball.x - ball.radius <= 0) {
     ball.dx *= -1;
   }
@@ -182,12 +364,12 @@ function ballWallCollision(ball, paddle, cvs) {
     ball.dy *= -1;
   }
   if (ball.y - ball.radius >= cvs.height) {
-    // life--;
+    dakchi.lifes--;
     resetBall(ball, paddle, cvs);
   }
 }
 
-function ballBrikCollision(ball, bricks) {
+function ballBrikCollision(ball, bricks, dakchi) {
   for (let i = 0; i < bricks.length; i++) {
     if (bricks[i].status) {
       // console.log("ball = ", ball.x, ball.y);
@@ -205,7 +387,7 @@ function ballBrikCollision(ball, bricks) {
         bricks[i].status = false;
         bricks[i].element.style.opacity = 0;
         ball.dy *= -1;
-        // score += SCORE_UNIT;
+        dakchi.score += 20;
       } else if (
         ball.y >= bricks[i].y &&
         ball.y <= bricks[i].y + bricks[i].brickesheight &&
@@ -219,8 +401,29 @@ function ballBrikCollision(ball, bricks) {
         bricks[i].status = false;
         bricks[i].element.style.opacity = 0;
         ball.dx *= -1;
-        //   score += SCORE_UNIT;
+        dakchi.score += 20;
       }
     }
+  }
+}
+
+function generateStars(count = 100) {
+  const container = document.getElementById("starsBackground");
+  const colors = ["#ffffff", "#ccc", "#aaffff", "#ffe0ff"];
+
+  for (let i = 0; i < count; i++) {
+    const star = document.createElement("div");
+    const size = Math.random() * 2 + 1;
+
+    star.classList.add("star");
+    star.style.width = `${size}px`;
+    star.style.height = `${size}px`;
+    star.style.left = `${Math.random() * 100}%`;
+    star.style.top = `${Math.random() * 100}%`;
+    star.style.backgroundColor =
+      colors[Math.floor(Math.random() * colors.length)];
+    star.style.animationDuration = `${10 + Math.random() * 20}s`;
+
+    container.appendChild(star);
   }
 }
