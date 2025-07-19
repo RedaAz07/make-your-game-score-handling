@@ -1,12 +1,12 @@
 function GameLoop() {
+    // variables 
     const ball = document.getElementById("ball")
     const paddle = document.getElementById("paddle")
     const gameMessage = document.getElementById("gameMessage")
     const bricksContainer = document.getElementById("bricksContainer")
     const timeValue = document.querySelector(".time-value")
     const container = document.getElementById("gameArea")
-
-
+    const restartBtn = document.getElementById("restartBtn")
 
 
     const brick = {
@@ -18,36 +18,30 @@ function GameLoop() {
         brickesColor: ["brick-red", "brick-orange", "brick-yellow", "brick-green", "brick-blue", "brick-purple"]
     }
     const bricksPositions = []
-
     const time = {
         interval: null,
         sec: 0,
         min: 0
     }
-    let gameStart = false
-    let gamePause = false
-
-
     const gameState = {
-        gameStart,
-        gamePause
+        gameStart: false,
+        gamePause: false,
+
     }
+    const Pressed = {
+        rightPressed: false,
+        leftPressed: false,
+        paddleX: container.offsetWidth / 2
+    }
+    // pause check 
     if (!gameState.gameStart || gameState.gamePause) {
         gameMessage.style.display = "block"
     }
-
-
-
-
+    // create bricks 
     createbrickes(brick, bricksContainer, bricksPositions)
 
 
-
-
-    console.log(bricksPositions);
-
-
-
+    //keydown listener 
     document.addEventListener("keydown", (e) => {
         if (e.key === " ") {
             if (!gameState.gameStart) {
@@ -63,23 +57,15 @@ function GameLoop() {
                 creatTime(timeValue, time, gameState)
                 Pause(gameMessage, gameState)
             }
+        } else if (e.key === "ArrowRight") {
+            Pressed.rightPressed = true
+        } else if (e.key === "ArrowLeft") {
+            Pressed.leftPressed = true
         }
     })
 
-    const Pressed = {
-        rightPressed: false,
-        leftPressed: false,
-        paddleX: container.offsetWidth / 2
-    }
 
-    document.body.addEventListener('keydown', (event) => {
-        if (event.key === "ArrowRight") {
-            Pressed.rightPressed = true
-        } else if (event.key === "ArrowLeft") {
-            Pressed.leftPressed = true
-        }
-    });
-
+    // keyup listener ::: move all about move paddle 
     document.body.addEventListener('keyup', (event) => {
         if (event.key === "ArrowRight") {
             Pressed.rightPressed = false
@@ -89,21 +75,22 @@ function GameLoop() {
         }
     });
 
+    // restart listener 
+
+    restartBtn.addEventListener("click", () => {
+        restart(gameState, time, Pressed, container)
+    })
 
 
-/*     movepaddle(Pressed, paddle, paddleX)
- */    loop(Pressed, paddle)
+
+    loop(Pressed, paddle, gameState)
 }
 
 
-
+// fuction that create break  and add class Name +  add the brick position 
 function createbrickes(brick, bricksContainer, bricksPositions) {
-
-
     for (let row = 0; row < brick.brickesrow; row++) {
         for (let col = 0; col < brick.brickescol; col++) {
-
-
             const div =
                 document.createElement("div")
             div.classList = `brick ${brick.brickesColor[row]}`
@@ -122,7 +109,7 @@ function createbrickes(brick, bricksContainer, bricksPositions) {
     }
 
 }
-
+// function that handle the time 
 function creatTime(timeValue, time, gameState) {
     if (gameState.gameStart && time.interval === null) {
         time.interval = setInterval(() => {
@@ -138,14 +125,16 @@ function creatTime(timeValue, time, gameState) {
         time.interval = null
     }
 }
-
+// start  handler 
 function start(gameMessage) {
     gameMessage.style.display = "none"
 }
+// pause handler 
 function Pause(gameMessage) {
     gameMessage.style.display = "block"
 
 }
+/// paddke move handler 
 function movepaddle(Pressed, paddle) {
     let brick_container = document.querySelector('.bricks-container')
     const paddleWidth = paddle.offsetWidth;
@@ -166,16 +155,33 @@ function movepaddle(Pressed, paddle) {
 
     paddle.style.left = `${Pressed.paddleX}px`;
 }
+
+
+function restart(gameState, time, Pressed, container) {
+    time.sec = 0
+    time.min = 0
+    clearInterval(time.interval)
+    time.interval = null
+    gameState.gameStart = false
+    gameState.gamePause = false
+    Pressed.rightPressed = false
+    Pressed.leftPressed = false
+    Pressed.paddleX = container.offsetWidth / 2
+}
+
+
 GameLoop()
 
-
-function loop(Pressed, paddle) {
-    movepaddle(Pressed, paddle,)
+// loop function that add the request animation 
+function loop(Pressed, paddle, gameState) {
+    if (gameState.gameStart) {
+        movepaddle(Pressed, paddle)
+    }
   /*   draw(ball, ballDive);
     movepaddle() */
 /*     update(ball, paddle, bricksPositions, cvs);
  */    requestAnimationFrame(() =>
-        loop(Pressed, paddle)
+        loop(Pressed, paddle, gameState)
     );
 }
 
