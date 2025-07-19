@@ -2,10 +2,14 @@ let container = document.getElementById("game-container");
 let gameArea = document.getElementById("gameArea");
 let score = document.querySelector('.score-value');
 let lives = document.querySelector('.lives-value');
-let dashboard = document.createElement('div')
+let gameMessage = document.createElement('div')
 let intro = document.getElementById("intro");
-dashboard.className = "dashboard"
-document.body.appendChild(dashboard)
+let pauseIcon = document.getElementById("pauseBtn");
+let timeValue = document.querySelector('.time-value');
+intro.classList.add("image")
+gameMessage.className = "gameMessage"
+gameMessage.innerHTML="Press Space to Start"
+document.body.appendChild(gameMessage)
 let restLifes = 3
 let scoree = 0
 let colors = ["red", "orange", "yellow", "green", "blue", "purple"];
@@ -16,6 +20,18 @@ let ballX, ballY;
 let dx = 4;
 let dy = -4;
 let bricks = [];
+
+let time = {
+    min: 0,
+    sec: 0,
+    interval: null
+};
+// Game state
+const gameState = {
+    gameStart: false,
+    gamePause: false,
+    gameOver: false,
+};
 
 const Createelements = () => {
     let containerbricks = document.createElement("div");
@@ -58,12 +74,78 @@ document.body.addEventListener('keydown', (event) => {
     }
 });
 document.body.addEventListener('keyup', (event) => {
-    if (event.key === "ArrowRight") {
+    if (event.key === " ") {
+        if (gameState.gameOver && gameState.gamePause) {
+            restart();
+        }
+        if (!gameState.gameStart) {
+            intro.classList.add("hidden");
+            pauseIcon.innerHTML = "⏸️ pause";
+            gameState.gameStart = true;
+            gameState.gamePause = false;
+            start(gameMessage);
+            creatTime(timeValue, time, gameState);
+        } else {
+            pauseIcon.innerHTML = "▶️ Continue";
+            gameState.gamePause = true;
+            gameState.gameStart = false;
+            creatTime(timeValue, time, gameState);
+            Pause(gameMessage, gameState);
+        }
+    } else if (event.key === "ArrowRight") {
         rightPressed = false;
     } else if (event.key === "ArrowLeft") {
         leftPressed = false;
     }
 });
+
+function creatTime(timeValue, time, gameState) {
+    if (gameState.gameStart && time.interval === null) {
+        time.interval = setInterval(() => {
+            time.sec++;
+            if (time.sec === 60) {
+                time.min++;
+                time.sec = 0;
+            }
+            timeValue.innerHTML = `${String(time.min).padStart(2, "0")}:${String(
+                time.sec
+            ).padStart(2, "0")}`;
+        }, 1000);
+    } else if (gameState.gamePause) {
+        clearInterval(time.interval);
+        time.interval = null;
+    }
+}
+
+function start(gameMessage) {
+    gameMessage.style.display = "none";
+}
+
+function Pause(gameMessage) {
+    gameMessage.style.display = "block";
+}
+
+function restart() {
+    gameState.gameOver = false
+
+    lives = 3
+    scoree = 0
+    score.innerHTML = "0";
+    lives.innerHTML = "3";
+    bricks = [];
+    gameArea.innerHTML = "";
+    Createelements();
+
+    paddleX = gameArea.offsetWidth / 2 - paddle.offsetWidth / 2;
+    ballX = gameArea.offsetWidth / 2;
+    ballY = gameArea.offsetHeight - 60;
+
+    clearInterval(time.interval);
+    time.interval = null;
+    time.sec = 0;
+    time.min = 0;
+    timeValue.innerHTML = "00:00";
+}
 
 function movepaddle() {
     const containerWidth = gameArea.offsetWidth;
@@ -110,9 +192,9 @@ function handleBrickCollision() {
             }
         }
     } else {
-        dashboard.style.display = "block"
-        container.style.opacity = 0.1
-        dashboard.innerHTML = `
+        gameMessage.style.display = "block"
+        container.style.opacity = 0
+        gameMessage.innerHTML = `
         <div>You Win! 🎉</div>
                     <div class="start-message">Score: ${scoree}</div>
                     <div class="start-message">Press ESC to play again</div>`
@@ -155,9 +237,9 @@ function moveball() {
         restLifes--
         lives.innerHTML = restLifes
         if (restLifes == 0) {
-            dashboard.style.display = "block"
+            gameMessage.style.display = "block"
             container.style.opacity = 0.1
-            dashboard.innerHTML = `<div>Game Over!</div>
+            gameMessage.innerHTML = `<div>Game Over!</div>
         <div class="start-message">Final Score: ${scoree}</div>
         <div class="start-message">Press ESC to restart</div>`
             return
