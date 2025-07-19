@@ -2,9 +2,7 @@ let container = document.getElementById("game-container")
 let colors = ["red", "orange", "yellow", "green", "blue", "purple"]
 let rightPressed = false;
 let leftPressed = false;
-let paddleX = container.offsetWidth/2;
-let ballX = container.offsetWidth/2
-let ballY = container.offsetHeight - 30
+
 const Createelements = () => {
     let containerbricks = document.createElement("div")
     let paddle = document.createElement("div")
@@ -58,6 +56,10 @@ const Createelements = () => {
 Createelements()
 
 let paddle = document.querySelector('.paddle')
+let ball = document.querySelector(".ball")
+let paddleX = gameArea.offsetWidth / 2 - paddle.offsetWidth / 2;
+let ballX = gameArea.offsetWidth / 2
+let ballY = gameArea.offsetHeight - 60
 document.body.addEventListener('keydown', (event) => {
     if (event.key === "ArrowRight") {
         rightPressed = true
@@ -96,7 +98,6 @@ function movepaddle() {
     paddle.style.left = `${paddleX}px`;
 }
 
-let ball = document.querySelector(".ball")
 function moveball() {
     ballX += 6;
     ballY -= 6;
