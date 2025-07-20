@@ -20,6 +20,7 @@ const gameState = {
   gameStart: false,
   gamePause: false,
   gameOver: false,
+  gameWine: false
 };
 
 // Brick settings
@@ -140,7 +141,7 @@ function GameLoop() {
 
   document.body.addEventListener("keydown", (event) => {
     if (event.key === " ") {
-      if (gameState.gameOver && gameState.gamePause) {
+      if ((gameState.gameOver && gameState.gamePause) || gameState.gameWine && gameState.gamePause) {
         Restart(
           brick,
           bricksContainer,
@@ -205,12 +206,12 @@ function loop(
   gameState,
   dakchi
 ) {
-  if (gameState.gameStart  ) {
+  if (gameState.gameStart) {
     movepaddle(paddle, cursors);
     draw(ball, ballDive, paddle, dakchi);
     update(ball, paddle, bricksPositions, cvs, dakchi);
   }
-console.log(1);
+  console.log(1);
 
   requestAnimationFrame(() =>
     loop(
@@ -266,11 +267,11 @@ function Restart(
 ) {
 
 
-gameState.gameOver =  false
+  gameState.gameOver = false
 
-  dakchi.lifes= 3
-  dakchi.score= 0
-  dakchi.scoreValue.innerHTML =  "0"
+  dakchi.lifes = 3
+  dakchi.score = 0
+  dakchi.scoreValue.innerHTML = "0"
   dakchi.lifeValue.innerHTML = "3"
 
 
@@ -343,6 +344,15 @@ function update(ball, paddle, bricksPositions, cvs, dakchi) {
   ballPaddleCollision(ball, paddle);
   ballWallCollision(ball, paddle, cvs, dakchi);
   ballBrikCollision(ball, bricksPositions, dakchi);
+
+
+  const allBricksBroken = bricksPositions.every(b => b.status === false);
+  if (allBricksBroken && !gameState.gameOver && !gameState.gameWine) {
+    gameState.gameWine = true;
+    gameState.gameStart = false
+    gameWin();
+    return;
+  }
   ball.x += ball.dx;
   ball.y += ball.dy;
 }
@@ -350,9 +360,8 @@ function update(ball, paddle, bricksPositions, cvs, dakchi) {
 function draw(ball, divBall, paddle, dakchi) {
   dakchi.scoreValue.innerHTML = dakchi.score;
   dakchi.lifeValue.innerHTML = dakchi.lifes;
-  divBall.style.transform = `translate(${ball.x + ball.dx}px, ${
-    ball.y + ball.dy
-  }px)`;
+  divBall.style.transform = `translate(${ball.x + ball.dx}px, ${ball.y + ball.dy
+    }px)`;
   paddle.element.style.transform = `translate(${paddle.x}px)`;
 }
 
@@ -397,12 +406,13 @@ function ballWallCollision(ball, paddle, cvs, dakchi) {
   }
   if (ball.y - ball.radius >= cvs.height) {
     dakchi.lifes--;
-    resetBall(ball, paddle, cvs);
     if (dakchi.lifes === 0) {
       gameState.gameOver = true;
+      gameState.gameStart = false
       gameOver();
       return;
     }
+    resetBall(ball, paddle, cvs);
   }
 }
 
@@ -440,19 +450,17 @@ function ballBrikCollision(ball, bricks, dakchi) {
 
 function generateStars(count = 100) {
   const container = document.getElementById("starsBackground");
-  const colors = ["#ffffff", "#ccc", "#aaffff", "#ffe0ff"];
 
   for (let i = 0; i < count; i++) {
     const star = document.createElement("div");
     const size = Math.random() * 2 + 1;
-
     star.classList.add("star");
+
     star.style.width = `${size}px`;
     star.style.height = `${size}px`;
     star.style.left = `${Math.random() * 100}%`;
     star.style.top = `${Math.random() * 100}%`;
-    star.style.backgroundColor =
-      colors[Math.floor(Math.random() * colors.length)];
+
     star.style.animationDuration = `${10 + Math.random() * 20}s`;
 
     container.appendChild(star);
@@ -468,7 +476,6 @@ function gameOver() {
   gameState.gameStart = false;
   gameState.gamePause = true;
 
-  // Show "Game Over" message
   gameMessage.innerText = "💀 Game Over! Press Space to Restart";
   gameMessage.style.display = "block";
 
@@ -476,5 +483,17 @@ function gameOver() {
   clearInterval(time.interval);
   time.interval = null;
 
-  // Optionally reset score/lives here or wait for Restart()
 }
+
+
+function gameWin() {
+  gameState.gameStart = false;
+  gameState.gamePause = true;
+
+  gameMessage.innerText = "🎉 You Win! Press Space to Restart";
+  gameMessage.style.display = "block";
+
+  clearInterval(time.interval);
+  time.interval = null;
+}
+
