@@ -60,9 +60,12 @@ function setupInput() {
   });
 }
 function loop() {
-  update();
-  draw();
-  requestAnimationFrame(loop);
+  if (config.gameState.gameStart && !config.wait.status) {
+    update();
+    draw();
+    clearAnimation(config.requestID.id);
+    config.requestID.id = requestAnimationFrame(loop);
+  }
 }
 function update() {
   if (config.cursors.rightPressed)
@@ -88,10 +91,19 @@ function update() {
     return;
   }
   if (config.ball.y >= config.cvs.height) {
-    config.ball.x =
-      config.paddle.x + config.paddle.width / 2 - config.ball.width / 2;
-    config.ball.y = config.paddle.y - config.ball.height;
-    config.ball.dy = -config.ball.speed;
+    config.gameStatus.lifes--;
+
+    if (config.gameStatus.lifes === 0) {
+      config.gameState.gameOver = true;
+      config.gameState.gameStart = false;
+      gameOver();
+      return;
+    }
+    config.wait.status = true;
+    setTimeout(() => {
+      config.wait.status = false;
+      loop()
+    }, 3000);
     resetBall();
     return;
   }
@@ -110,11 +122,11 @@ function update() {
     collidePoint =
       Math.floor((collidePoint / (config.paddle.width / 2)) * 10) / 10;
 
-    if (collidePoint >= 0 && collidePoint <= 0.4) {
-      collidePoint = 0.4;
+    if (collidePoint >= 0 && collidePoint <= 0.2) {
+      collidePoint = 0.2;
     }
-    if (collidePoint >= -0.4 && collidePoint < 0) {
-      collidePoint = -0.4;
+    if (collidePoint >= -0.2 && collidePoint < 0) {
+      collidePoint = -0.2;
     }
 
     let angle = collidePoint * (Math.PI / 3);
@@ -162,17 +174,43 @@ function update() {
       if (Math.abs(minOverlapX - minOverlapY) < threshold) {
         config.ball.dx *= -1;
         config.ball.dy *= -1;
+        config.gameStatus.score += 20;
       } else if (minOverlapX < minOverlapY) {
         // side collision
         config.ball.dx *= -1;
+        config.gameStatus.score += 20;
       } else {
         // top/bottom collision
         config.ball.dy *= -1;
+        config.gameStatus.score += 20;
       }
 
       break;
     }
   }
+  const allBricksBroken = config.bricksPositions.every(
+    (b) => b.status === false
+  );
+  if (
+    allBricksBroken &&
+    !config.gameState.gameOver &&
+    !config.gameState.gameWine
+  ) {
+    config.gameState.gameWine = true;
+    config.gameState.gameStart = false;
+    gameWin();
+    return;
+  }
+}
+function gameWin() {
+  config.gameState.gameStart = false;
+  config.gameState.gamePause = true;
+
+  config.gameMessage.innerText = "🎉 You Win! Press Space to Restart";
+  config.gameMessage.style.display = "block";
+
+  clearInterval(config.time.interval);
+  config.time.interval = null;
 }
 function draw() {
   config.gameStatus.scoreValue.innerHTML = config.gameStatus.score;
@@ -189,44 +227,79 @@ function Pause() {
 }
 
 function Restart() {
-  config.gameState.gameOver = false;
-
-  config.gameStatus.lifes = 3;
-  config.gameStatus.score = 0;
-  config.gameStatus.scoreValue.innerHTML = "0";
-  config.gameStatus.lifeValue.innerHTML = "3";
-
-  createBricks();
-  setupSizes();
-  draw();
-  clearInterval(config.time.interval);
-  config.time.interval = null;
-  config.time.sec = 0;
-  config.time.min = 0;
-  config.timeValue.innerHTML = "00:00";
+  window.location.reload();
 }
 function resetBall() {
-  ball.dx = ball.speed * Math.random();
-  ball.dy = -ball.speed;
+  config.ball.x =
+    config.paddle.x + config.paddle.width / 2 - config.ball.width / 2;
+  config.ball.y = config.paddle.y - config.ball.height;
+  config.ball.dy = -config.ball.speed;
+  config.ball.dx = config.ball.speed * Math.random();
+  config.ball.dy = -config.ball.speed;
+}
+function gameOver() {
+  // Stop game
+  config.gameState.gameStart = false;
+  config.gameState.gamePause = true;
+  console.log(config.requestID);
+
+  clearAnimation();
+  config.gameMessage.innerText = "💀 Game Over! Press Space to Restart";
+  config.gameMessage.style.display = "block";
+
+  // Stop timer
+  clearInterval(config.time.interval);
+  config.time.interval = null;
+}
+function creatTime() {
+  if (config.gameState.gameStart && config.time.interval === null) {
+    config.time.interval = setInterval(() => {
+      config.time.sec++;
+      if (config.time.sec === 60) {
+        config.time.min++;
+        config.time.sec = 0;
+      }
+      config.timeValue.innerHTML = `${String(config.time.min).padStart(
+        2,
+        "0"
+      )}:${String(config.time.sec).padStart(2, "0")}`;
+    }, 1000);
+  } else if (config.gameState.gamePause) {
+    clearInterval(config.time.interval);
+    config.time.interval = null;
+  }
+}
+
+function clearAnimation() {
+  if (config.requestID.id) {
+    cancelAnimationFrame(config.requestID.id);
+  }
 }
 
 function GameLoop() {
   config.introScreen.classList.add("image");
-  let toggle = 0;
 
   config.pauseBtn.addEventListener("click", () => {
-    if (toggle === 0) {
+    if (config.gameState.gameStart && !config.gameState.gamePause) {
       config.pauseIcon.innerHTML = "▶️ Continue";
-      Pause();
       config.gameState.gameStart = false;
       config.gameState.gamePause = true;
-      toggle++;
-    } else {
+      clearAnimation();
+      creatTime();
+      Pause();
+    } else if (
+      !config.gameState.gameStart &&
+      config.gameState.gamePause &&
+      !config.gameState.gameOver &&
+      !config.gameState.gameWine
+    ) {
       config.pauseIcon.innerHTML = "⏸️ pause";
-      start();
       config.gameState.gameStart = true;
       config.gameState.gamePause = false;
-      toggle = 0;
+      start();
+      clearAnimation();
+      creatTime();
+      loop();
     }
   });
 
@@ -235,17 +308,57 @@ function GameLoop() {
     config.gameState.gameStart = true;
     config.gameState.gamePause = false;
     start();
+    creatTime();
+    clearAnimation();
+    loop();
   });
 
   config.restartBtn.addEventListener("click", () => {
-    config.gameState.gameStart = false;
-    config.gameState.gamePause = false;
     Restart();
   });
 
-  if (!config.gameState.gameStart || config.gameState.gamePause) {
-    config.gameMessage.style.display = "block";
-  }
+  document.body.addEventListener("keydown", (event) => {
+    event.preventDefault();
+    if (event.key === " ") {
+      if (
+        (config.gameState.gameOver || config.gameState.gameWine) &&
+        config.gameState.gamePause
+      ) {
+        Restart();
+      } else if (!config.gameState.gameStart && !config.gameState.gamePause) {
+        config.introScreen.classList.add("hidden");
+        config.pauseIcon.innerHTML = "⏸️ pause";
+        config.gameState.gameStart = true;
+        config.gameState.gamePause = false;
+        start();
+        creatTime();
+        clearAnimation();
+        loop();
+      } else if (config.gameState.gameStart && !config.gameState.gamePause) {
+        config.pauseIcon.innerHTML = "▶️ Continue";
+        config.gameState.gamePause = true;
+        config.gameState.gameStart = false;
+        clearAnimation();
+        creatTime();
+        Pause();
+      } else if (
+        !config.gameState.gameStart &&
+        config.gameState.gamePause &&
+        !config.gameState.gameOver &&
+        !config.gameState.gameWine
+      ) {
+        // Resume after pause
+        config.pauseIcon.innerHTML = "⏸️ pause";
+        config.gameState.gameStart = true;
+        config.gameState.gamePause = false;
+        start();
+        creatTime();
+        clearAnimation();
+        loop();
+      }
+    }
+  });
+
   updateCanvasSize();
   setupSizes();
   createBricks();
@@ -254,9 +367,8 @@ function GameLoop() {
   window.addEventListener("resize", () => {
     updateCanvasSize();
     setupSizes();
+    Restart();
   });
-
-  loop();
 }
 
 GameLoop();
