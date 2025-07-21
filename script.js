@@ -16,21 +16,23 @@ function GameLoop() {
   };
   const paddle = {
     element: paddleDive,
-    x: container.offsetWidth / 2 - paddleDive.offsetWidth / 2,
-    y: container.offsetHeight - 20 - paddleDive.offsetHeight,
-    radiusX: paddleDive.offsetWidth / 2,
-    radiusY: paddleDive.offsetHeight / 2,
-    width: paddleDive.offsetWidth,
-    height: paddleDive.offsetHeight,
+    x: container.clientWidth / 2 - paddleDive.clientWidth / 2,
+    y: container.clientHeight - 20 - paddleDive.clientHeight,
+    radiusX: paddleDive.clientWidth / 2,
+    radiusY: paddleDive.clientHeight / 2,
+    width: paddleDive.clientWidth,
+    height: paddleDive.clientHeight,
   };
   const BALL_RADIUS = 8;
   const ball = {
     x: cvs.width / 2 - BALL_RADIUS,
-    y: paddle.y - paddle.radiusY - ballDive.offsetHeight,
+    y: paddle.y - ballDive.clientHeight,
+    width: ballDive.clientWidth,
+    height: ballDive.clientHeight,
     radius: BALL_RADIUS,
-    speed: 3,
-    dx: 3,
-    dy: -3,
+    speed: 1,
+    dx: 1,
+    dy: -1,
   };
   const brick = {
     brickesrow: 6,
@@ -138,7 +140,7 @@ function update(ball, paddle, bricksPositions, cvs) {
 
 function draw(ball, divBall, paddle) {
   divBall.style.transform = `translate(${ball.x}px,${ball.y}px)`;
-  paddle.element.style.transform = `translate(${paddle.x}px)`;
+  paddle.element.style.transform = `translate(${paddle.x}px,${paddle.y}px)`;
 }
 
 function resetBall(ball, paddle, cvs) {
@@ -149,32 +151,35 @@ function resetBall(ball, paddle, cvs) {
 }
 function ballPaddleCollision(ball, paddle) {
   if (
-    ball.y + ball.radius >= paddle.y &&
-    ball.y + ball.radius <= paddle.y + 2 &&
-    ball.x > paddle.x &&
-    ball.x < paddle.x + paddle.width
+    ball.y < paddle.y &&
+    ball.y + ball.height >= paddle.y &&
+    ball.y + ball.height <= paddle.y + paddle.height &&
+    ((ball.x > paddle.x && ball.x < paddle.x + paddle.width) ||
+      (ball.x + ball.width < paddle.x + paddle.width &&
+        ball.x + ball.width > paddle.x))
   ) {
-    console.log(ball.x, paddle.x, paddle.radiusX);
+    console.log(ball.y, paddle.y, paddle.radiusX);
 
     let collidePoint = ball.x - (paddle.x + paddle.radiusX);
     collidePoint = collidePoint / paddle.radiusX;
     let angle = collidePoint * (Math.PI / 3);
-    ball.dx = Math.floor(ball.speed * Math.sin(angle));
+    ball.dx = ball.speed * Math.sin(angle);
 
-    ball.dy = Math.floor(-ball.speed * Math.cos(angle));
+    ball.dy = -ball.speed * Math.cos(angle);
   } else if (
     ball.y >= paddle.y &&
     ball.y <= paddle.y + paddle.height &&
-    ((ball.x + ball.radius >= paddle.x &&
-      ball.x + ball.radius <= paddle.x + 2) ||
-      (ball.x - ball.radius <= paddle.x + paddle.width &&
-        ball.x - ball.radius >= paddle.x + paddle.width - 2))
+    ((ball.x + ball.width >= paddle.x && ball.x + ball.width <= paddle.x + 5) ||
+      (ball.x <= paddle.x + paddle.width &&
+        ball.x >= paddle.x + paddle.width - 5))
   ) {
+    console.log("2=", ball.y, ball.x, paddle.y, paddle.x, paddle.width);
+
     ball.dx *= -1;
   }
 }
 function ballWallCollision(ball, paddle, cvs) {
-  if (ball.x + ball.radius >= cvs.width - ball.radius || ball.x  <= 0) {
+  if (ball.x + ball.radius >= cvs.width - ball.radius || ball.x <= 0) {
     console.log(cvs);
 
     ball.dx *= -1;
