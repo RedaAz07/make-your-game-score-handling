@@ -1,4 +1,7 @@
-import * as config from "./config.js";
+import * as config from "./models/config.js";
+import {setupInput} from "./models/paddel.js";
+
+
 function updateCanvasSize() {
   config.cvs.width = config.container.clientWidth;
   config.cvs.height = config.container.clientHeight;
@@ -49,16 +52,7 @@ function createBricks() {
     }
   }
 }
-function setupInput() {
-  document.body.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight") config.cursors.rightPressed = true;
-    if (e.key === "ArrowLeft") config.cursors.leftPressed = true;
-  });
-  document.body.addEventListener("keyup", (e) => {
-    if (e.key === "ArrowRight") config.cursors.rightPressed = false;
-    if (e.key === "ArrowLeft") config.cursors.leftPressed = false;
-  });
-}
+
 function loop() {
   if (config.gameState.gameStart && !config.wait.status) {
     update();
