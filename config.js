@@ -25,8 +25,8 @@ export const gameState = {
 
 // Brick settings
 export const brick = {
-  rows: 6,
-  cols: 5,
+  rows: 2,
+  cols: 2,
   gap: 10,
   width: 0,
   height: 0,
@@ -129,18 +129,7 @@ function GameLoop() {
         (gameState.gameOver && gameState.gamePause) ||
         (gameState.gameWine && gameState.gamePause)
       ) {
-        Restart(
-          brick,
-          bricksContainer,
-          bricksPositions,
-          time,
-          paddle,
-          ball,
-          ballDive,
-          timeValue,
-          container,
-          gameStatus
-        );
+        Restart();
       }
       if (!gameState.gameStart) {
         introScreen.classList.add("hidden");
@@ -171,28 +160,10 @@ function GameLoop() {
     }
   });
 
-  loop(
-    ball,
-    paddle,
-    bricksPositions,
-    cvs,
-    ballDive,
-    cursors,
-    gameState,
-    gameStatus
-  );
+  loop();
 }
 
-function loop(
-  ball,
-  paddle,
-  bricksPositions,
-  cvs,
-  ballDive,
-  cursors,
-  gameState,
-  gameStatus
-) {
+function loop() {
   if (gameState.gameStart) {
     movepaddle(paddle, cursors);
     draw(ball, ballDive, paddle, gameStatus);
@@ -215,7 +186,7 @@ function loop(
 }
 
 function creatTime(timeValue, time, gameState) {
-  if (gameState.gameStart && time.interval === null) {
+  if (gameState.gameStart && time.interval === imagenull) {
     time.interval = setInterval(() => {
       time.sec++;
       if (time.sec === 60) {
@@ -231,7 +202,6 @@ function creatTime(timeValue, time, gameState) {
     time.interval = null;
   }
 }
-
 function start(gameMessage) {
   gameMessage.style.display = "none";
 }
