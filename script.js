@@ -7,24 +7,26 @@ function GameLoop() {
   const container = document.getElementById("gameArea");
   let cursors = {
     rightPressed: false,
-    leftPressed: false
-  }
+    leftPressed: false,
+  };
 
   const cvs = {
-    width: container.offsetWidth,
-    height: container.offsetHeight,
+    width: container.clientWidth,
+    height: container.clientHeight,
   };
   const paddle = {
     element: paddleDive,
     x: container.offsetWidth / 2 - paddleDive.offsetWidth / 2,
-    y: container.offsetHeight - 30,
+    y: container.offsetHeight - 20 - paddleDive.offsetHeight,
+    radiusX: paddleDive.offsetWidth / 2,
+    radiusY: paddleDive.offsetHeight / 2,
     width: paddleDive.offsetWidth,
     height: paddleDive.offsetHeight,
   };
   const BALL_RADIUS = 8;
   const ball = {
     x: cvs.width / 2 - BALL_RADIUS,
-    y: paddle.y - BALL_RADIUS,
+    y: paddle.y - paddle.radiusY - ballDive.offsetHeight,
     radius: BALL_RADIUS,
     speed: 3,
     dx: 3,
@@ -47,26 +49,25 @@ function GameLoop() {
   const bricksPositions = [];
 
   createbrickes(brick, bricksContainer, bricksPositions);
-  document.body.addEventListener('keydown', (event) => {
+  document.body.addEventListener("keydown", (event) => {
     if (event.key === "ArrowRight") {
-      cursors.rightPressed = true
+      cursors.rightPressed = true;
     } else if (event.key === "ArrowLeft") {
-      cursors.leftPressed = true
+      cursors.leftPressed = true;
     }
   });
 
-  document.body.addEventListener('keyup', (event) => {
+  document.body.addEventListener("keyup", (event) => {
     if (event.key === "ArrowRight") {
-      cursors.rightPressed = false
-
+      cursors.rightPressed = false;
     } else if (event.key === "ArrowLeft") {
-      cursors.leftPressed = false
+      cursors.leftPressed = false;
     }
   });
   loop(ball, paddle, bricksPositions, cvs, ballDive, cursors);
 }
 function loop(ball, paddle, bricksPositions, cvs, ballDive, cursors) {
-  movepaddle(paddle, cursors)
+  movepaddle(paddle, cursors);
   draw(ball, ballDive, paddle);
 
   update(ball, paddle, bricksPositions, cvs);
@@ -75,28 +76,24 @@ function loop(ball, paddle, bricksPositions, cvs, ballDive, cursors) {
   );
 }
 
-
 function movepaddle(paddle, cursors) {
-  let brick_container = document.querySelector('.bricks-container')
-  
-  const paddleWidth = paddle.width;
-  const containerWidth = brick_container.offsetWidth
-  console.log(cursors.rightPressed);
+  let brick_container = document.querySelector(".bricks-container");
 
+  const paddleWidth = paddle.width;
+  const containerWidth = brick_container.offsetWidth;
+  //console.log(cursors.rightPressed);
 
   if (cursors.rightPressed) {
-    paddle.x += 6
+    paddle.x += 6;
   } else if (cursors.leftPressed) {
     paddle.x -= 6;
   }
   if (paddle.x < 0) {
-    paddle.x = 0
+    paddle.x = 0;
   }
   if (paddle.x > containerWidth - paddleWidth) {
-    paddle.x = containerWidth - paddleWidth;
+    paddle.x = containerWidth - paddle.width;
   }
-
-
 }
 
 function createbrickes(brick, bricksContainer, bricksPositions) {
@@ -128,17 +125,20 @@ function createbrickes(brick, bricksContainer, bricksPositions) {
 GameLoop();
 
 function update(ball, paddle, bricksPositions, cvs) {
+  const x = ball.x;
+  const y = ball.y;
   ballPaddleCollision(ball, paddle);
   ballWallCollision(ball, paddle, cvs);
   ballBrikCollision(ball, bricksPositions);
-  ball.x += ball.dx;
-  ball.y += ball.dy;
+  if (x === ball.x && y === ball.y) {
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+  }
 }
 
 function draw(ball, divBall, paddle) {
-  divBall.style.transform = `translate(${ball.x + ball.dx}px,${ball.y + ball.dy
-    }px)`;
-  paddle.element.style.transform = `translate(${paddle.x}px)`
+  divBall.style.transform = `translate(${ball.x}px,${ball.y}px)`;
+  paddle.element.style.transform = `translate(${paddle.x}px)`;
 }
 
 function resetBall(ball, paddle, cvs) {
@@ -150,32 +150,33 @@ function resetBall(ball, paddle, cvs) {
 function ballPaddleCollision(ball, paddle) {
   if (
     ball.y + ball.radius >= paddle.y &&
-    ball.y + ball.radius < paddle.y + paddle.height &&
+    ball.y + ball.radius <= paddle.y + 2 &&
     ball.x > paddle.x &&
     ball.x < paddle.x + paddle.width
   ) {
-    let collidePoint = ball.x - (paddle.x + paddle.width / 2);
-    collidePoint = collidePoint / (paddle.width / 2);
-    let angle = collidePoint * (Math.PI / 3);
-    ball.dx = ball.speed * Math.sin(angle);
-    console.log(ball.dx);
+    console.log(ball.x, paddle.x, paddle.radiusX);
 
-    ball.dy = -ball.speed * Math.cos(angle);
-    console.log(ball.dy);
-  }
-  if (
+    let collidePoint = ball.x - (paddle.x + paddle.radiusX);
+    collidePoint = collidePoint / paddle.radiusX;
+    let angle = collidePoint * (Math.PI / 3);
+    ball.dx = Math.floor(ball.speed * Math.sin(angle));
+
+    ball.dy = Math.floor(-ball.speed * Math.cos(angle));
+  } else if (
     ball.y >= paddle.y &&
-    ball.y + ball.radius <= paddle.y + paddle.height &&
+    ball.y <= paddle.y + paddle.height &&
     ((ball.x + ball.radius >= paddle.x &&
-      ball.x + ball.radius <= paddle.x + 5) ||
-      (ball.x <= paddle.x + paddle.width &&
-        ball.x >= paddle.x + paddle.width - 5))
+      ball.x + ball.radius <= paddle.x + 2) ||
+      (ball.x - ball.radius <= paddle.x + paddle.width &&
+        ball.x - ball.radius >= paddle.x + paddle.width - 2))
   ) {
     ball.dx *= -1;
   }
 }
 function ballWallCollision(ball, paddle, cvs) {
-  if (ball.x + ball.radius >= cvs.width || ball.x - ball.radius <= 0) {
+  if (ball.x + ball.radius >= cvs.width - ball.radius || ball.x  <= 0) {
+    console.log(cvs);
+
     ball.dx *= -1;
   }
   if (ball.y - ball.radius <= 0) {
@@ -201,7 +202,7 @@ function ballBrikCollision(ball, bricks) {
           (ball.y + ball.radius >= bricks[i].y &&
             ball.y + ball.radius < bricks[i].y + bricks[i].brickesheight))
       ) {
-        console.log(55);
+        //console.log(55);
         bricks[i].status = false;
         bricks[i].element.style.opacity = 0;
         ball.dy *= -1;
@@ -214,7 +215,7 @@ function ballBrikCollision(ball, bricks) {
           (ball.x - ball.radius <= bricks[i].x + bricks[i].brickeswidth &&
             ball.x - ball.radius > bricks[i].x))
       ) {
-        console.log(66);
+        // console.log(66);
 
         bricks[i].status = false;
         bricks[i].element.style.opacity = 0;
