@@ -18,7 +18,7 @@ function GameLoop() {
   const BALL_RADIUS = 8;
   const ball = {
     x: cvs.width / 2 - BALL_RADIUS,
-    y: paddle.y-18,
+    y: paddle.y - BALL_RADIUS,
     radius: BALL_RADIUS,
     speed: 3,
     dx: 3,
@@ -28,7 +28,7 @@ function GameLoop() {
     brickesrow: 6,
     brickescol: 10,
     brickeswidth: 54,
-    brickesheight: 17,
+    brickesheight: 25,
     brickesColor: [
       "brick-red",
       "brick-orange",
@@ -41,6 +41,7 @@ function GameLoop() {
   const bricksPositions = [];
 
   createbrickes(brick, bricksContainer, bricksPositions);
+  console.log(bricksPositions);
 
   loop(ball, paddle, bricksPositions, cvs, ballDive);
 }
@@ -54,23 +55,27 @@ function loop(ball, paddle, bricksPositions, cvs, ballDive) {
 }
 
 function createbrickes(brick, bricksContainer, bricksPositions) {
+  let count = 0;
   for (let row = 0; row < brick.brickesrow; row++) {
     for (let col = 0; col < brick.brickescol; col++) {
       const div = document.createElement("div");
       div.classList = `brick ${brick.brickesColor[row]}`;
       div.style.width = `${brick.brickeswidth}px`;
       div.style.height = `${brick.brickesheight}px`;
+      div.id = count;
 
       bricksContainer.appendChild(div);
 
       bricksPositions.push({
+        id: count,
         element: div,
-        brickX: row * (5 + brick.brickeswidth) + 20,
-        bricky: col * (5 + brick.brickesheight) + 20,
+        x: col * (3 + brick.brickeswidth) + 20,
+        y: row * (3 + brick.brickesheight) + 20,
         brickeswidth: brick.brickeswidth,
         brickesheight: brick.brickesheight,
         status: true,
       });
+      count++;
     }
   }
 }
@@ -80,6 +85,7 @@ GameLoop();
 function update(ball, paddle, bricksPositions, cvs) {
   ballPaddleCollision(ball, paddle);
   ballWallCollision(ball, paddle, cvs);
+  ballBrikCollision(ball, bricksPositions);
   ball.x += ball.dx;
   ball.y += ball.dy;
 }
@@ -98,7 +104,7 @@ function resetBall(ball, paddle, cvs) {
 }
 function ballPaddleCollision(ball, paddle) {
   if (
-    ball.y+ ball.radius >= paddle.y &&
+    ball.y + ball.radius >= paddle.y &&
     ball.y + ball.radius < paddle.y + paddle.height &&
     ball.x > paddle.x &&
     ball.x < paddle.x + paddle.width
@@ -108,9 +114,9 @@ function ballPaddleCollision(ball, paddle) {
     let angle = collidePoint * (Math.PI / 3);
     ball.dx = ball.speed * Math.sin(angle);
     console.log(ball.dx);
-    
+
     ball.dy = -ball.speed * Math.cos(angle);
-     console.log(ball.dy);
+    console.log(ball.dy);
   }
   if (
     ball.y >= paddle.y &&
@@ -139,30 +145,37 @@ function ballWallCollision(ball, paddle, cvs) {
 function ballBrikCollision(ball, bricks) {
   for (let i = 0; i < bricks.length; i++) {
     if (bricks[i].status) {
-      console.log("ball =", ball.x - ball.radius);
-      console.log("brick =", bricks[i].brickX);
+      // console.log("ball = ", ball.x, ball.y);
+      // console.log("brick =", bricks[i].x, bricks[i].y);
+
       if (
-        ball.x - ball.radius >= bricks[i].brickX &&
-        ball.x + ball.radius <= bricks[i].brickX + bricks[i].brickeswidth &&
-        (ball.y - ball.radius >= bricks[i].bricky + bricks.brickesheight ||
-          ball.y + ball.radius <= bricks[i].bricky)
+        ball.x >= bricks[i].x &&
+        ball.x <= bricks[i].x + bricks[i].brickeswidth &&
+        ((ball.y - ball.radius <= bricks[i].y + bricks[i].brickesheight &&
+          ball.y - ball.radius > bricks[i].y) ||
+          (ball.y + ball.radius >= bricks[i].y &&
+            ball.y + ball.radius < bricks[i].y + bricks[i].brickesheight))
       ) {
         console.log(55);
         bricks[i].status = false;
         bricks[i].element.style.opacity = 0;
         ball.dy *= -1;
         // score += SCORE_UNIT;
+      } else if (
+        ball.y >= bricks[i].y &&
+        ball.y <= bricks[i].y + bricks[i].brickesheight &&
+        ((ball.x + ball.radius >= bricks[i].x &&
+          ball.x + ball.radius < bricks[i].x + bricks[i].brickeswidth) ||
+          (ball.x - ball.radius <= bricks[i].x + bricks[i].brickeswidth &&
+            ball.x - ball.radius > bricks[i].x))
+      ) {
+        console.log(66);
+
+        bricks[i].status = false;
+        bricks[i].element.style.opacity = 0;
+        ball.dx *= -1;
+        //   score += SCORE_UNIT;
       }
-    } else if (
-      ball.y - ball.radius >= bricks[i].y &&
-      ball.y + ball.radius <= bricks[i].y + bricks.brickesheight &&
-      (ball.x - ball.radius <= bricks[i].x + bricks[i].brickeswidth ||
-        ball.x + ball.radius >= bricks[i].x)
-    ) {
-      bricks[i].status = false;
-      bricks[i].element.style.opacity = 0;
-      ball.dx *= -1;
-      //   score += SCORE_UNIT;
     }
   }
 }
