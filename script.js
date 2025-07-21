@@ -1,417 +1,375 @@
-// === GLOBAL VARIABLES ===
-
-// DOM elements
-const introScreen = document.getElementById("introScreen");
-const ballDive = document.getElementById("ball");
-const paddleDive = document.getElementById("paddle");
-const gameMessage = document.getElementById("gameMessage");
-const bricksContainer = document.getElementById("bricksContainer");
-const timeValue = document.querySelector(".time-value");
-const container = document.getElementById("gameArea");
-const pauseIcon = document.querySelector(".pause-icon");
-const continueBtn = document.getElementById("continueBtn");
-const restartBtn = document.getElementById("restartBtn");
-const pauseBtn = document.getElementById("pauseBtn");
-const scoreValue = document.querySelector(".score-value");
-const lifeValue = document.querySelector(".lives-value");
-
-// Game state
-
-const gameee = gameMessage.innerHTML;
-
-const gameState = {
-  gameStart: false,
-  gamePause: false,
-  gameOver: false,
-  gameWine: false,
-};
-
-// Brick settings
-const brick = {
-  brickesrow: 6,
-  brickescol: 5,
-  brickeswidth: 102,
-  brickesheight: 25,
-  brickesColor: [
-    "brick-red",
-    "brick-orange",
-    "brick-yellow",
-    "brick-green",
-    "brick-blue",
-    "brick-purple",
-  ],
-};
-const bricksPositions = [];
-
-// Paddle settings
-const paddle = {
-  element: paddleDive,
-  x: container.offsetWidth / 2 - paddleDive.offsetWidth / 2,
-  y: container.offsetHeight - 30,
-  width: paddleDive.offsetWidth,
-  height: paddleDive.offsetHeight,
-};
-
-// Ball settings
-const BALL_RADIUS = 8;
-const ball = {
-  x: container.offsetWidth / 2 - BALL_RADIUS,
-  y: container.offsetHeight - 60,
-  radius: BALL_RADIUS,
-  speed: 3,
-  dx: 3,
-  dy: -3,
-};
-
-// Canvas size
-const cvs = {
-  width: container.offsetWidth,
-  height: container.offsetHeight,
-};
-
-// Keyboard controls
-let cursors = {
-  rightPressed: false,
-  leftPressed: false,
-};
-
-// Timer
-const time = {
-  interval: null,
-  sec: 0,
-  min: 0,
-};
-
-// Score & Lives
-const dakchi = {
-  lifes: 3,
-  score: 0,
-  scoreValue: scoreValue,
-  lifeValue: lifeValue,
-};
-
-// === MAIN GAME SETUP ===
-
-function GameLoop() {
-  introScreen.classList.add("image");
-
-  pauseBtn.addEventListener("click", () => {
-    if (gameState.gameStart && !gameState.gamePause) {
-      console.log("pause click");
-
-      pauseIcon.innerHTML = "▶️ Continue";
-
-      Pause(gameMessage);
-      gameState.gameStart = false;
-      gameState.gamePause = true;
-      creatTime(timeValue, time, gameState);
-    } else if (
-      !gameState.gameStart &&
-      gameState.gamePause &&
-      !gameState.gameOver &&
-      !gameState.gameWine
-    ) {
-      console.log("start click");
-      pauseIcon.innerHTML = "⏸️ pause";
-      gameState.gameStart = true;
-      gameState.gamePause = false;
-      start(gameMessage);
-      creatTime(timeValue, time, gameState);
-    }
-  });
-
-  continueBtn.addEventListener("click", () => {
-    console.log(1);
-
-    pauseIcon.innerHTML = "⏸️ pause";
-    gameState.gameStart = true;
-    gameState.gamePause = false;
-    start(gameMessage);
-    creatTime(timeValue, time, gameState);
-  });
-
-  restartBtn.addEventListener("click", () => {
-    Restart();
-  });
-
-  createbrickes(brick, bricksContainer, bricksPositions);
-
-  document.body.addEventListener("keydown", (event) => {
-    if (event.key === " ") {
-      if ((gameState.gameOver || gameState.gameWine) && gameState.gamePause) {
-        Restart();
-      } else if (!gameState.gameStart && !gameState.gamePause) {
-        // Start for the first time
-
-        introScreen.classList.add("hidden");
-        pauseIcon.innerHTML = "⏸️ pause";
-        gameState.gameStart = true;
-        gameState.gamePause = false;
-        start(gameMessage);
-        creatTime(timeValue, time, gameState);
-      } else if (gameState.gameStart && !gameState.gamePause) {
-        console.log("pause space");
-
-        // Pause the game
-        pauseIcon.innerHTML = "▶️ Continue";
-        gameState.gameStart = false;
-        gameState.gamePause = true;
-        creatTime(timeValue, time, gameState);
-        Pause(gameMessage);
-      } else if (
-        !gameState.gameStart &&
-        gameState.gamePause &&
-        !gameState.gameOver &&
-        !gameState.gameWine
-      ) {
-        // Resume after pause
-        console.log("start space");
-
-        pauseIcon.innerHTML = "⏸️ pause";
-        gameState.gameStart = true;
-        gameState.gamePause = false;
-        start(gameMessage);
-        creatTime(timeValue, time, gameState);
-      }
-    } else if (event.key === "ArrowRight") {
-      cursors.rightPressed = true;
-    } else if (event.key === "ArrowLeft") {
-      cursors.leftPressed = true;
-    }
-  });
-
-  document.body.addEventListener("keyup", (event) => {
-    if (event.key === "ArrowRight") {
-      cursors.rightPressed = false;
-    } else if (event.key === "ArrowLeft") {
-      cursors.leftPressed = false;
-    }
-  });
-
-  loop(
-    ball,
-    paddle,
-    bricksPositions,
-    cvs,
-    ballDive,
-    cursors,
-    gameState,
-    dakchi
-  );
+import * as config from "./config.js";
+function updateCanvasSize() {
+  config.cvs.width = config.container.clientWidth;
+  config.cvs.height = config.container.clientHeight;
 }
+function setupSizes() {
+  config.paddle.width = config.cvs.width * 0.15;
+  config.paddle.height = config.cvs.height * 0.03;
+  config.paddle.x = config.cvs.width / 2 - config.paddle.width / 2;
+  config.paddle.y = config.cvs.height - config.paddle.height - 40;
+  config.paddleDive.style.width = `${config.paddle.width}px`;
+  config.paddleDive.style.height = `${config.paddle.height}px`;
 
-function loop(
-  ball,
-  paddle,
-  bricksPositions,
-  cvs,
-  ballDive,
-  cursors,
-  gameState,
-  dakchi
-) {
-  if (gameState.gameStart) {
-    movepaddle(paddle, cursors);
-    draw(ball, ballDive, paddle, dakchi);
-    update(ball, paddle, bricksPositions, cvs, dakchi);
-  }
+  config.ball.x =
+    config.paddle.x + config.paddle.width / 2 - config.ball.width / 2;
+  config.ball.y = config.paddle.y - config.ball.height;
 
-  requestAnimationFrame(() =>
-    loop(
-      ball,
-      paddle,
-      bricksPositions,
-      cvs,
-      ballDive,
-      cursors,
-      gameState,
-      dakchi
-    )
-  );
+  config.brick.width =
+    (config.cvs.width - (config.brick.cols + 1) * config.brick.gap) /
+    config.brick.cols;
+  config.brick.height = config.cvs.height * 0.05;
 }
+function createBricks() {
+  config.bricksContainer.innerHTML = "";
+  config.bricksPositions.length = 0;
 
-function creatTime(timeValue, time, gameState) {
-  if (gameState.gameStart && time.interval === null) {
-    time.interval = setInterval(() => {
-      time.sec++;
-      if (time.sec === 60) {
-        time.min++;
-        time.sec = 0;
-      }
-      timeValue.innerHTML = `${String(time.min).padStart(2, "0")}:${String(
-        time.sec
-      ).padStart(2, "0")}`;
-    }, 1000);
-  } else if (gameState.gamePause) {
-    clearInterval(time.interval);
-    time.interval = null;
-  }
-}
-
-function start(gameMessage) {
-  gameMessage.style.display = "none";
-}
-
-function Pause(gameMessage) {
-  gameMessage.style.display = "block";
-}
-
-function Restart(
- 
-) {
-  
-  window.location.reload()
-}
-
-function movepaddle(paddle, cursors) {
-  const brick_container = document.querySelector(".bricks-container");
-  const paddleWidth = paddle.width;
-  const containerWidth = brick_container.offsetWidth;
-
-  if (cursors.rightPressed) {
-    paddle.x += 6;
-  } else if (cursors.leftPressed) {
-    paddle.x -= 6;
-  }
-  if (paddle.x < 0) paddle.x = 0;
-  if (paddle.x > containerWidth - paddleWidth) {
-    paddle.x = containerWidth - paddleWidth;
-  }
-}
-
-function createbrickes(brick, bricksContainer, bricksPositions) {
-  let count = 0;
-  for (let row = 0; row < brick.brickesrow; row++) {
-    for (let col = 0; col < brick.brickescol; col++) {
+  for (let row = 0; row < config.brick.rows; row++) {
+    for (let col = 0; col < config.brick.cols; col++) {
       const div = document.createElement("div");
-      div.classList = `brick ${brick.brickesColor[row]}`;
-      div.style.width = `${brick.brickeswidth}px`;
-      div.style.height = `${brick.brickesheight}px`;
-      div.id = count;
-      bricksContainer.appendChild(div);
+      div.classList.add("brick", config.brick.colors[row]);
+      div.style.width = `${config.brick.width}px`;
+      div.style.height = `${config.brick.height}px`;
 
-      bricksPositions.push({
-        id: count,
+      const x =
+        config.brick.gap + col * (config.brick.width + config.brick.gap);
+      const y =
+        config.brick.gap + row * (config.brick.height + config.brick.gap);
+      div.style.transform = `translate(${x}px, ${y}px)`;
+
+      config.bricksContainer.appendChild(div);
+      config.bricksPositions.push({
         element: div,
-        x: col * (10 + brick.brickeswidth) + 25,
-        y: row * (10 + brick.brickesheight) + 25,
-        brickeswidth: brick.brickeswidth,
-        brickesheight: brick.brickesheight,
+        x,
+        y,
+        width: config.brick.width,
+        height: config.brick.height,
         status: true,
       });
-      count++;
     }
   }
 }
+function setupInput() {
+  document.body.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") config.cursors.rightPressed = true;
+    if (e.key === "ArrowLeft") config.cursors.leftPressed = true;
+  });
+  document.body.addEventListener("keyup", (e) => {
+    if (e.key === "ArrowRight") config.cursors.rightPressed = false;
+    if (e.key === "ArrowLeft") config.cursors.leftPressed = false;
+  });
+}
+function loop() {
+  if (config.gameState.gameStart && !config.wait.status) {
+    update();
+    draw();
+    clearAnimation(config.requestID.id);
+    config.requestID.id = requestAnimationFrame(loop);
+  }
+}
+function update() {
+  if (config.cursors.rightPressed)
+    config.paddle.x = Math.min(
+      config.paddle.x + 5,
+      config.cvs.width - config.paddle.width - 2
+    );
+  if (config.cursors.leftPressed)
+    config.paddle.x = Math.max(config.paddle.x - 5, 0);
 
-function update(ball, paddle, bricksPositions, cvs, dakchi) {
-  ballPaddleCollision(ball, paddle);
-  ballWallCollision(ball, paddle, cvs, dakchi);
-  ballBrikCollision(ball, bricksPositions, dakchi);
+  config.ball.x += config.ball.dx;
+  config.ball.y += config.ball.dy;
 
-  const allBricksBroken = bricksPositions.every((b) => b.status === false);
-  if (allBricksBroken && !gameState.gameOver && !gameState.gameWine) {
-    gameState.gameWine = true;
-    gameState.gameStart = false;
-    gameWin();
+  if (
+    config.ball.x <= 0 ||
+    config.ball.x + config.ball.width >= config.cvs.width
+  ) {
+    config.ball.dx *= -1;
     return;
   }
-  ball.x += ball.dx;
-  ball.y += ball.dy;
-}
-
-function draw(ball, divBall, paddle, dakchi) {
-  dakchi.scoreValue.innerHTML = dakchi.score;
-  dakchi.lifeValue.innerHTML = dakchi.lifes;
-  divBall.style.transform = `translate(${ball.x + ball.dx}px, ${
-    ball.y + ball.dy
-  }px)`;
-  paddle.element.style.transform = `translate(${paddle.x}px)`;
-}
-
-function resetBall(ball, paddle, cvs) {
-  ball.x = cvs.width / 2;
-  ball.y = paddle.y - ball.radius;
-  ball.dx = ball.speed * (Math.random() * 2 - 1);
-  ball.dy = -ball.speed;
-}
-
-function ballPaddleCollision(ball, paddle) {
-  if (
-    ball.y + ball.radius >= paddle.y &&
-    ball.y + ball.radius < paddle.y + paddle.height &&
-    ball.x > paddle.x &&
-    ball.x < paddle.x + paddle.width
-  ) {
-    let collidePoint = ball.x - (paddle.x + paddle.width / 2);
-    collidePoint = collidePoint / (paddle.width / 2);
-    let angle = collidePoint * (Math.PI / 3);
-    ball.dx = ball.speed * Math.sin(angle);
-    ball.dy = -ball.speed * Math.cos(angle);
+  if (config.ball.y <= 0) {
+    config.ball.dy *= -1;
+    return;
   }
-  if (
-    ball.y >= paddle.y &&
-    ball.y + ball.radius <= paddle.y + paddle.height &&
-    ((ball.x + ball.radius >= paddle.x &&
-      ball.x + ball.radius <= paddle.x + 5) ||
-      (ball.x <= paddle.x + paddle.width &&
-        ball.x >= paddle.x + paddle.width - 5))
-  ) {
-    ball.dx *= -1;
-  }
-}
+  if (config.ball.y >= config.cvs.height) {
+    config.gameStatus.lifes--;
 
-function ballWallCollision(ball, paddle, cvs, dakchi) {
-  if (ball.x + ball.radius >= cvs.width || ball.x - ball.radius <= 0) {
-    ball.dx *= -1;
-  }
-  if (ball.y - ball.radius <= 0) {
-    ball.dy *= -1;
-  }
-  if (ball.y - ball.radius >= cvs.height) {
-    dakchi.lifes--;
-    if (dakchi.lifes === 0) {
-      gameState.gameOver = true;
-      gameState.gameStart = false;
+    if (config.gameStatus.lifes === 0) {
+      config.gameState.gameOver = true;
+      config.gameState.gameStart = false;
       gameOver();
       return;
     }
-    resetBall(ball, paddle, cvs);
+    config.wait.status = true;
+    setTimeout(() => {
+      config.wait.status = false;
+      loop()
+    }, 3000);
+    resetBall();
+    return;
   }
-}
 
-function ballBrikCollision(ball, bricks, dakchi) {
-  for (let i = 0; i < bricks.length; i++) {
-    if (bricks[i].status) {
-      if (
-        ball.x >= bricks[i].x &&
-        ball.x <= bricks[i].x + bricks[i].brickeswidth &&
-        ((ball.y - ball.radius <= bricks[i].y + bricks[i].brickesheight &&
-          ball.y - ball.radius > bricks[i].y) ||
-          (ball.y + ball.radius >= bricks[i].y &&
-            ball.y + ball.radius < bricks[i].y + bricks[i].brickesheight))
-      ) {
-        bricks[i].status = false;
-        bricks[i].element.style.opacity = 0;
-        ball.dy *= -1;
-        dakchi.score += 20;
-      } else if (
-        ball.y >= bricks[i].y &&
-        ball.y <= bricks[i].y + bricks[i].brickesheight &&
-        ((ball.x + ball.radius >= bricks[i].x &&
-          ball.x + ball.radius < bricks[i].x + bricks[i].brickeswidth) ||
-          (ball.x - ball.radius <= bricks[i].x + bricks[i].brickeswidth &&
-            ball.x - ball.radius > bricks[i].x))
-      ) {
-        bricks[i].status = false;
-        bricks[i].element.style.opacity = 0;
-        ball.dx *= -1;
-        dakchi.score += 20;
+  // Collision with paddle
+  if (
+    config.ball.y + config.ball.height >= config.paddle.y &&
+    config.ball.y <= config.paddle.y + config.paddle.height / 2 &&
+    config.ball.x + config.ball.width >= config.paddle.x &&
+    config.ball.x <= config.paddle.x + config.paddle.width
+  ) {
+    let collidePoint =
+      config.ball.x +
+      config.ball.width / 2 -
+      (config.paddle.x + config.paddle.width / 2);
+    collidePoint =
+      Math.floor((collidePoint / (config.paddle.width / 2)) * 10) / 10;
+
+    if (collidePoint >= 0 && collidePoint <= 0.2) {
+      collidePoint = 0.2;
+    }
+    if (collidePoint >= -0.2 && collidePoint < 0) {
+      collidePoint = -0.2;
+    }
+
+    let angle = collidePoint * (Math.PI / 3);
+
+    config.ball.dx = (config.ball.speed + 1) * Math.sin(angle);
+    config.ball.dy = -(config.ball.speed + 1) * Math.cos(angle);
+    return;
+  }
+
+  // Collision with bricks
+  for (let b of config.bricksPositions) {
+    if (!b.status) continue;
+
+    const ballLeft = config.ball.x;
+    const ballRight = config.ball.x + config.ball.width;
+    const ballTop = config.ball.y;
+    const ballBottom = config.ball.y + config.ball.height;
+
+    const brickLeft = b.x;
+    const brickRight = b.x + b.width;
+    const brickTop = b.y;
+    const brickBottom = b.y + b.height;
+
+    const isColliding =
+      ballRight > brickLeft &&
+      ballLeft < brickRight &&
+      ballBottom > brickTop &&
+      ballTop < brickBottom;
+
+    if (isColliding) {
+      b.status = false;
+      b.element.style.opacity = 0;
+
+      // Calculate how deep the ball overlaps on each side
+      const overlapLeft = ballRight - brickLeft;
+      const overlapRight = brickRight - ballLeft;
+      const overlapTop = ballBottom - brickTop;
+      const overlapBottom = brickBottom - ballTop;
+
+      const minOverlapX = Math.min(overlapLeft, overlapRight);
+      const minOverlapY = Math.min(overlapTop, overlapBottom);
+
+      const threshold = 4; // corner sensitivity in pixels
+
+      if (Math.abs(minOverlapX - minOverlapY) < threshold) {
+        config.ball.dx *= -1;
+        config.ball.dy *= -1;
+        config.gameStatus.score += 20;
+      } else if (minOverlapX < minOverlapY) {
+        // side collision
+        config.ball.dx *= -1;
+        config.gameStatus.score += 20;
+      } else {
+        // top/bottom collision
+        config.ball.dy *= -1;
+        config.gameStatus.score += 20;
       }
+
+      break;
     }
   }
+  const allBricksBroken = config.bricksPositions.every(
+    (b) => b.status === false
+  );
+  if (
+    allBricksBroken &&
+    !config.gameState.gameOver &&
+    !config.gameState.gameWine
+  ) {
+    config.gameState.gameWine = true;
+    config.gameState.gameStart = false;
+    gameWin();
+    return;
+  }
+}
+function gameWin() {
+  config.gameState.gameStart = false;
+  config.gameState.gamePause = true;
+
+  config.gameMessage.innerText = "🎉 You Win! Press Space to Restart";
+  config.gameMessage.style.display = "block";
+
+  clearInterval(config.time.interval);
+  config.time.interval = null;
+}
+function draw() {
+  config.gameStatus.scoreValue.innerHTML = config.gameStatus.score;
+  config.gameStatus.lifeValue.innerHTML = config.gameStatus.lifes;
+  config.ballDive.style.transform = `translate(${config.ball.x}px, ${config.ball.y}px)`;
+  config.paddleDive.style.transform = `translate(${config.paddle.x}px, ${config.paddle.y}px)`;
+}
+function start() {
+  config.gameMessage.style.display = "none";
 }
 
+function Pause() {
+  config.gameMessage.style.display = "block";
+}
+
+function Restart() {
+  window.location.reload();
+}
+function resetBall() {
+  config.ball.x =
+    config.paddle.x + config.paddle.width / 2 - config.ball.width / 2;
+  config.ball.y = config.paddle.y - config.ball.height;
+  config.ball.dy = -config.ball.speed;
+  config.ball.dx = config.ball.speed * Math.random();
+  config.ball.dy = -config.ball.speed;
+}
+function gameOver() {
+  // Stop game
+  config.gameState.gameStart = false;
+  config.gameState.gamePause = true;
+  console.log(config.requestID);
+
+  clearAnimation();
+  config.gameMessage.innerText = "💀 Game Over! Press Space to Restart";
+  config.gameMessage.style.display = "block";
+
+  // Stop timer
+  clearInterval(config.time.interval);
+  config.time.interval = null;
+}
+function creatTime() {
+  if (config.gameState.gameStart && config.time.interval === null) {
+    config.time.interval = setInterval(() => {
+      config.time.sec++;
+      if (config.time.sec === 60) {
+        config.time.min++;
+        config.time.sec = 0;
+      }
+      config.timeValue.innerHTML = `${String(config.time.min).padStart(
+        2,
+        "0"
+      )}:${String(config.time.sec).padStart(2, "0")}`;
+    }, 1000);
+  } else if (config.gameState.gamePause) {
+    clearInterval(config.time.interval);
+    config.time.interval = null;
+  }
+}
+
+function clearAnimation() {
+  if (config.requestID.id) {
+    cancelAnimationFrame(config.requestID.id);
+  }
+}
+
+function GameLoop() {
+  config.introScreen.classList.add("image");
+
+  config.pauseBtn.addEventListener("click", () => {
+    if (config.gameState.gameStart && !config.gameState.gamePause) {
+      config.pauseIcon.innerHTML = "▶️ Continue";
+      config.gameState.gameStart = false;
+      config.gameState.gamePause = true;
+      clearAnimation();
+      creatTime();
+      Pause();
+    } else if (
+      !config.gameState.gameStart &&
+      config.gameState.gamePause &&
+      !config.gameState.gameOver &&
+      !config.gameState.gameWine
+    ) {
+      config.pauseIcon.innerHTML = "⏸️ pause";
+      config.gameState.gameStart = true;
+      config.gameState.gamePause = false;
+      start();
+      clearAnimation();
+      creatTime();
+      loop();
+    }
+  });
+
+  config.continueBtn.addEventListener("click", () => {
+    config.pauseIcon.innerHTML = "⏸️ pause";
+    config.gameState.gameStart = true;
+    config.gameState.gamePause = false;
+    start();
+    creatTime();
+    clearAnimation();
+    loop();
+  });
+
+  config.restartBtn.addEventListener("click", () => {
+    Restart();
+  });
+
+  document.body.addEventListener("keydown", (event) => {
+    event.preventDefault();
+    if (event.key === " ") {
+      if (
+        (config.gameState.gameOver || config.gameState.gameWine) &&
+        config.gameState.gamePause
+      ) {
+        Restart();
+      } else if (!config.gameState.gameStart && !config.gameState.gamePause) {
+        config.introScreen.classList.add("hidden");
+        config.pauseIcon.innerHTML = "⏸️ pause";
+        config.gameState.gameStart = true;
+        config.gameState.gamePause = false;
+        start();
+        creatTime();
+        clearAnimation();
+        loop();
+      } else if (config.gameState.gameStart && !config.gameState.gamePause) {
+        config.pauseIcon.innerHTML = "▶️ Continue";
+        config.gameState.gamePause = true;
+        config.gameState.gameStart = false;
+        clearAnimation();
+        creatTime();
+        Pause();
+      } else if (
+        !config.gameState.gameStart &&
+        config.gameState.gamePause &&
+        !config.gameState.gameOver &&
+        !config.gameState.gameWine
+      ) {
+        // Resume after pause
+        config.pauseIcon.innerHTML = "⏸️ pause";
+        config.gameState.gameStart = true;
+        config.gameState.gamePause = false;
+        start();
+        creatTime();
+        clearAnimation();
+        loop();
+      }
+    }
+  });
+
+  updateCanvasSize();
+  setupSizes();
+  createBricks();
+  setupInput();
+
+  window.addEventListener("resize", () => {
+    updateCanvasSize();
+    setupSizes();
+    Restart();
+  });
+}
 function generateStars(count = 100) {
   const container = document.getElementById("starsBackground");
 
@@ -429,31 +387,5 @@ function generateStars(count = 100) {
     container.appendChild(star);
   }
 }
-
-// Start game
+generateStars(300)
 GameLoop();
-generateStars(300);
-
-function gameOver() {
-  // Stop game
-  gameState.gameStart = false;
-  gameState.gamePause = true;
-
-  gameMessage.innerText = "💀 Game Over! Press Space to Restart";
-  gameMessage.style.display = "block";
-
-  // Stop timer
-  clearInterval(time.interval);
-  time.interval = null;
-}
-
-function gameWin() {
-  gameState.gameStart = false;
-  gameState.gamePause = true;
-
-  gameMessage.innerText = "🎉 You Win! Press Space to Restart";
-  gameMessage.style.display = "block";
-
-  clearInterval(time.interval);
-  time.interval = null;
-}
