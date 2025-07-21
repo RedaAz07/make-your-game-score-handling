@@ -16,11 +16,14 @@ const scoreValue = document.querySelector(".score-value");
 const lifeValue = document.querySelector(".lives-value");
 
 // Game state
+
+const gameee = gameMessage.innerHTML;
+
 const gameState = {
   gameStart: false,
   gamePause: false,
   gameOver: false,
-  gameWine: false
+  gameWine: false,
 };
 
 // Brick settings
@@ -91,83 +94,84 @@ const dakchi = {
 
 function GameLoop() {
   introScreen.classList.add("image");
-  let toggle = 0;
 
   pauseBtn.addEventListener("click", () => {
-    if (toggle === 0) {
+    if (gameState.gameStart && !gameState.gamePause) {
+      console.log("pause click");
+
       pauseIcon.innerHTML = "▶️ Continue";
+
       Pause(gameMessage);
       gameState.gameStart = false;
       gameState.gamePause = true;
-      toggle++;
-    } else {
+      creatTime(timeValue, time, gameState);
+    } else if (
+      !gameState.gameStart &&
+      gameState.gamePause &&
+      !gameState.gameOver &&
+      !gameState.gameWine
+    ) {
+      console.log("start click");
       pauseIcon.innerHTML = "⏸️ pause";
-      start(gameMessage);
       gameState.gameStart = true;
       gameState.gamePause = false;
-      toggle = 0;
+      start(gameMessage);
+      creatTime(timeValue, time, gameState);
     }
   });
 
   continueBtn.addEventListener("click", () => {
+    console.log(1);
+
     pauseIcon.innerHTML = "⏸️ pause";
     gameState.gameStart = true;
     gameState.gamePause = false;
     start(gameMessage);
+    creatTime(timeValue, time, gameState);
   });
 
   restartBtn.addEventListener("click", () => {
-    gameState.gameStart = false;
-    gameState.gamePause = false;
-    Restart(
-      brick,
-      bricksContainer,
-      bricksPositions,
-      time,
-      paddle,
-      ball,
-      ballDive,
-      timeValue,
-      container,
-      dakchi
-    );
+    Restart();
   });
-
-  if (!gameState.gameStart || gameState.gamePause) {
-    gameMessage.style.display = "block";
-  }
 
   createbrickes(brick, bricksContainer, bricksPositions);
 
   document.body.addEventListener("keydown", (event) => {
     if (event.key === " ") {
-      if ((gameState.gameOver && gameState.gamePause) || gameState.gameWine && gameState.gamePause) {
-        Restart(
-          brick,
-          bricksContainer,
-          bricksPositions,
-          time,
-          paddle,
-          ball,
-          ballDive,
-          timeValue,
-          container,
-          dakchi
-        );
-      }
-      if (!gameState.gameStart) {
+      if ((gameState.gameOver || gameState.gameWine) && gameState.gamePause) {
+        Restart();
+      } else if (!gameState.gameStart && !gameState.gamePause) {
+        // Start for the first time
+
         introScreen.classList.add("hidden");
         pauseIcon.innerHTML = "⏸️ pause";
         gameState.gameStart = true;
         gameState.gamePause = false;
         start(gameMessage);
         creatTime(timeValue, time, gameState);
-      } else {
+      } else if (gameState.gameStart && !gameState.gamePause) {
+        console.log("pause space");
+
+        // Pause the game
         pauseIcon.innerHTML = "▶️ Continue";
-        gameState.gamePause = true;
         gameState.gameStart = false;
+        gameState.gamePause = true;
         creatTime(timeValue, time, gameState);
-        Pause(gameMessage, gameState);
+        Pause(gameMessage);
+      } else if (
+        !gameState.gameStart &&
+        gameState.gamePause &&
+        !gameState.gameOver &&
+        !gameState.gameWine
+      ) {
+        // Resume after pause
+        console.log("start space");
+
+        pauseIcon.innerHTML = "⏸️ pause";
+        gameState.gameStart = true;
+        gameState.gamePause = false;
+        start(gameMessage);
+        creatTime(timeValue, time, gameState);
       }
     } else if (event.key === "ArrowRight") {
       cursors.rightPressed = true;
@@ -211,7 +215,6 @@ function loop(
     draw(ball, ballDive, paddle, dakchi);
     update(ball, paddle, bricksPositions, cvs, dakchi);
   }
-  console.log(1);
 
   requestAnimationFrame(() =>
     loop(
@@ -254,49 +257,10 @@ function Pause(gameMessage) {
 }
 
 function Restart(
-  brick,
-  bricksContainer,
-  bricksPositions,
-  time,
-  paddle,
-  ball,
-  ballDive,
-  timeValue,
-  container,
-  dakchi
+ 
 ) {
-
-
-  gameState.gameOver = false
-
-  dakchi.lifes = 3
-  dakchi.score = 0
-  dakchi.scoreValue.innerHTML = "0"
-  dakchi.lifeValue.innerHTML = "3"
-
-
-
-
-  bricksContainer.innerHTML = "";
-  bricksPositions.length = 0;
-
-  createbrickes(brick, bricksContainer, bricksPositions);
-
-  paddle.x = container.offsetWidth / 2 - paddle.width / 2;
-  paddle.element.style.transform = `translate(${paddle.x}px)`;
-
-  ball.x = container.offsetWidth / 2 - ball.radius;
-  ball.y = paddle.y - ball.radius;
-  ball.dx = 3;
-  ball.dy = -3;
-  ball.speed = 3;
-  ballDive.style.transform = `translate(${ball.x}px, ${ball.y}px)`;
-
-  clearInterval(time.interval);
-  time.interval = null;
-  time.sec = 0;
-  time.min = 0;
-  timeValue.innerHTML = "00:00";
+  
+  window.location.reload()
 }
 
 function movepaddle(paddle, cursors) {
@@ -345,11 +309,10 @@ function update(ball, paddle, bricksPositions, cvs, dakchi) {
   ballWallCollision(ball, paddle, cvs, dakchi);
   ballBrikCollision(ball, bricksPositions, dakchi);
 
-
-  const allBricksBroken = bricksPositions.every(b => b.status === false);
+  const allBricksBroken = bricksPositions.every((b) => b.status === false);
   if (allBricksBroken && !gameState.gameOver && !gameState.gameWine) {
     gameState.gameWine = true;
-    gameState.gameStart = false
+    gameState.gameStart = false;
     gameWin();
     return;
   }
@@ -360,8 +323,9 @@ function update(ball, paddle, bricksPositions, cvs, dakchi) {
 function draw(ball, divBall, paddle, dakchi) {
   dakchi.scoreValue.innerHTML = dakchi.score;
   dakchi.lifeValue.innerHTML = dakchi.lifes;
-  divBall.style.transform = `translate(${ball.x + ball.dx}px, ${ball.y + ball.dy
-    }px)`;
+  divBall.style.transform = `translate(${ball.x + ball.dx}px, ${
+    ball.y + ball.dy
+  }px)`;
   paddle.element.style.transform = `translate(${paddle.x}px)`;
 }
 
@@ -408,7 +372,7 @@ function ballWallCollision(ball, paddle, cvs, dakchi) {
     dakchi.lifes--;
     if (dakchi.lifes === 0) {
       gameState.gameOver = true;
-      gameState.gameStart = false
+      gameState.gameStart = false;
       gameOver();
       return;
     }
@@ -455,7 +419,6 @@ function generateStars(count = 100) {
     const star = document.createElement("div");
     const size = Math.random() * 2 + 1;
     star.classList.add("star");
-
     star.style.width = `${size}px`;
     star.style.height = `${size}px`;
     star.style.left = `${Math.random() * 100}%`;
@@ -482,9 +445,7 @@ function gameOver() {
   // Stop timer
   clearInterval(time.interval);
   time.interval = null;
-
 }
-
 
 function gameWin() {
   gameState.gameStart = false;
@@ -496,4 +457,3 @@ function gameWin() {
   clearInterval(time.interval);
   time.interval = null;
 }
-
