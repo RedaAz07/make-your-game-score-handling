@@ -173,32 +173,9 @@ function update() {
 function GameLoop() {
   config.introScreen.classList.add("image");
 
-  config.pauseBtn.addEventListener("click", () => {
-    if (config.gameState.gameStart && !config.gameState.gamePause) {
-      config.pauseIcon.innerHTML = "▶️ Continue";
-      config.gameState.gameStart = false;
-      config.gameState.gamePause = true;
-      clearAnimation();
-      creatTime();
-      Pause();
-    } else if (
-      !config.gameState.gameStart &&
-      config.gameState.gamePause &&
-      !config.gameState.gameOver &&
-      !config.gameState.gameWine
-    ) {
-      config.pauseIcon.innerHTML = "⏸️ pause";
-      config.gameState.gameStart = true;
-      config.gameState.gamePause = false;
-      start();
-      clearAnimation();
-      creatTime();
-      loop();
-    }
-  });
+
 
   config.continueBtn.addEventListener("click", () => {
-    config.pauseIcon.innerHTML = "⏸️ pause";
     config.gameState.gameStart = true;
     config.gameState.gamePause = false;
     start();
@@ -211,9 +188,13 @@ function GameLoop() {
     Restart();
   });
 
+  let spaceCooldown = false;
+
   document.body.addEventListener("keydown", (event) => {
-    event.preventDefault();
-    if (event.key === " ") {
+    if (event.key === " " && !spaceCooldown) {
+      spaceCooldown = true;
+
+      // Your spacebar logic here
       if (
         (config.gameState.gameOver || config.gameState.gameWine) &&
         config.gameState.gamePause
@@ -221,7 +202,6 @@ function GameLoop() {
         Restart();
       } else if (!config.gameState.gameStart && !config.gameState.gamePause) {
         config.introScreen.classList.add("hidden");
-        config.pauseIcon.innerHTML = "⏸️ pause";
         config.gameState.gameStart = true;
         config.gameState.gamePause = false;
         start();
@@ -229,7 +209,6 @@ function GameLoop() {
         clearAnimation();
         loop();
       } else if (config.gameState.gameStart && !config.gameState.gamePause) {
-        config.pauseIcon.innerHTML = "▶️ Continue";
         config.gameState.gamePause = true;
         config.gameState.gameStart = false;
         clearAnimation();
@@ -241,8 +220,6 @@ function GameLoop() {
         !config.gameState.gameOver &&
         !config.gameState.gameWine
       ) {
-        // Resume after pause
-        config.pauseIcon.innerHTML = "⏸️ pause";
         config.gameState.gameStart = true;
         config.gameState.gamePause = false;
         start();
@@ -250,6 +227,10 @@ function GameLoop() {
         clearAnimation();
         loop();
       }
+
+      setTimeout(() => {
+        spaceCooldown = false;
+      }, 500);
     }
   });
 

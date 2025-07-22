@@ -63,8 +63,8 @@ export function createBricks() {
 }
 
 export function setupSizes() {
-  config.paddle.width = config.cvs.width * 0.15;
-  config.paddle.height = config.cvs.height * 0.03;
+  config.paddle.width = config.cvs.width * 0.16;
+  config.paddle.height = config.cvs.height * 0.04;
   config.paddle.x = config.cvs.width / 2 - config.paddle.width / 2;
   config.paddle.y = config.cvs.height - config.paddle.height - 40;
   config.paddleDive.style.width = `${config.paddle.width}px`;

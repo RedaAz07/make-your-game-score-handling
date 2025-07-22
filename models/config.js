@@ -11,7 +11,6 @@ export const container = document.getElementById("gameArea");
 export const pauseIcon = document.querySelector(".pause-icon");
 export const continueBtn = document.getElementById("continueBtn");
 export const restartBtn = document.getElementById("restartBtn");
-export const pauseBtn = document.getElementById("pauseBtn");
 export const scoreValue = document.querySelector(".score-value");
 export const lifeValue = document.querySelector(".lives-value");
 
