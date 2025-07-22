@@ -172,8 +172,7 @@ function update() {
 
 function GameLoop() {
   config.introScreen.classList.add("image");
-
-
+  config.gameContainer.style.filter = "blur(30px)"
 
   config.continueBtn.addEventListener("click", () => {
     config.gameState.gameStart = true;
@@ -192,7 +191,7 @@ function GameLoop() {
 
   document.body.addEventListener("keydown", (event) => {
     if (event.key === " " && !spaceCooldown) {
-      spaceCooldown = true;
+        spaceCooldown = true;
 
       // Your spacebar logic here
       if (
@@ -202,6 +201,7 @@ function GameLoop() {
         Restart();
       } else if (!config.gameState.gameStart && !config.gameState.gamePause) {
         config.introScreen.classList.add("hidden");
+        config.gameContainer.style.filter = "none"
         config.gameState.gameStart = true;
         config.gameState.gamePause = false;
         start();

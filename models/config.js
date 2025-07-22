@@ -13,6 +13,8 @@ export const continueBtn = document.getElementById("continueBtn");
 export const restartBtn = document.getElementById("restartBtn");
 export const scoreValue = document.querySelector(".score-value");
 export const lifeValue = document.querySelector(".lives-value");
+export const gameContainer = document.getElementById("content")
+
 
 // Game state
 export const gameState = {
