@@ -19,11 +19,10 @@ import {
 } from "./models/gameStatus.js";
 
 function loop() {
+  if (!config.gameState.gameStart && !config.wait.status) return;
   if (config.gameState.gameStart && !config.wait.status) {
     update();
     draw();
-
-    config.requestID.id = requestAnimationFrame(loop);
   } else if (
     config.gameState.gameStart &&
     config.wait.status &&
@@ -33,8 +32,8 @@ function loop() {
     movePaddle(config.cursors, config.paddle, config.cvs);
     resetBall();
     draw();
-    config.requestID.id = requestAnimationFrame(loop);
   }
+  config.requestID.id = requestAnimationFrame(loop);
 }
 
 function update() {
@@ -95,7 +94,7 @@ function update() {
     if (collidePoint >= -0.2 && collidePoint < 0) {
       collidePoint = -0.2;
     }
-    //zawya li ghatmchi biha ela hsaab lblasa fin drbat lball 
+    //zawya li ghatmchi biha ela hsaab lblasa fin drbat lball
     let angle = collidePoint * (Math.PI / 3);
 
     config.ball.dx = (config.ball.speed + 1) * Math.sin(angle);
@@ -172,8 +171,7 @@ function update() {
 
 function GameLoop() {
   config.introScreen.classList.add("image");
-  config.gameContainer.style.filter = "blur(30px)"
-
+  config.gameContainer.style.filter = "blur(30px)";
   config.continueBtn.addEventListener("click", () => {
     config.gameState.gameStart = true;
     config.gameState.gamePause = false;
@@ -191,9 +189,7 @@ function GameLoop() {
 
   document.body.addEventListener("keydown", (event) => {
     if (event.key === " " && !spaceCooldown) {
-        spaceCooldown = true;
-
-      // Your spacebar logic here
+      spaceCooldown = true;
       if (
         (config.gameState.gameOver || config.gameState.gameWine) &&
         config.gameState.gamePause
@@ -201,7 +197,7 @@ function GameLoop() {
         Restart();
       } else if (!config.gameState.gameStart && !config.gameState.gamePause) {
         config.introScreen.classList.add("hidden");
-        config.gameContainer.style.filter = "none"
+        config.gameContainer.style.filter = "none";
         config.gameState.gameStart = true;
         config.gameState.gamePause = false;
         start();
@@ -238,7 +234,14 @@ function GameLoop() {
   setupSizes();
   createBricks();
   setupInput(config.cursors);
-  console.log(config.gameState);
+  let resizeTimeout;
+
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      Restart();
+    }, 200); // debounce delay in ms (adjust as needed)
+  });
 }
 
 GameLoop();
