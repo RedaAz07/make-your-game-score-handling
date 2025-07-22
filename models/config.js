@@ -26,7 +26,7 @@ export const gameState = {
 // Brick settings
 export const brick = {
   rows: 6,
-  cols: 6,
+  cols: 6 ,
   gap: 10,
   width: 0,
   height: 0,
@@ -82,6 +82,6 @@ export const gameStatus = {
   lifeValue: lifeValue,
 };
 
-export const requestID = { id: undefined };
+export const requestID = { id: null };
 
 export let wait = { status: false };
