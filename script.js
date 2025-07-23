@@ -8,7 +8,6 @@ import {
   updateGameAreaSize,
   setupSizes,
   createBricks,
-  updateBricks,
 } from "./models/helpers.js";
 import {
   Pause,
@@ -23,6 +22,7 @@ function loop() {
   if (config.gameState.gameStart && !config.wait.status) {
     update();
     draw();
+    config.requestID.id = requestAnimationFrame(loop);
   } else if (
     config.gameState.gameStart &&
     config.wait.status &&
@@ -32,8 +32,8 @@ function loop() {
     movePaddle(config.cursors, config.paddle, config.cvs);
     resetBall();
     draw();
+    config.requestID.id = requestAnimationFrame(loop);
   }
-  config.requestID.id = requestAnimationFrame(loop);
 }
 
 function update() {
@@ -184,6 +184,7 @@ function GameLoop() {
 
   config.restartBtn.addEventListener("click", () => {
     Restart();
+
   });
 
   let spaceCooldown = false;

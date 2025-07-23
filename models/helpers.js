@@ -8,7 +8,7 @@ export function creatTime() {
         config.time.min++;
         config.time.sec = 0;
       }
-      config.timeValue.innerHTML = `${String(config.time.min).padStart(
+      config.timeValue.textContent = `${String(config.time.min).padStart(
         2,
         "0"
       )}:${String(config.time.sec).padStart(2, "0")}`;
@@ -26,10 +26,10 @@ export function clearAnimation() {
   }
 }
 export function draw() {
-  config.gameStatus.scoreValue.innerHTML = config.gameStatus.score;
-  config.gameStatus.lifeValue.innerHTML = config.gameStatus.lifes;
-  config.ballDive.style.transform = `translate(${config.ball.x}px, ${config.ball.y}px)`;
-  config.paddleDive.style.transform = `translate(${config.paddle.x}px, ${config.paddle.y}px)`;
+  config.gameStatus.scoreValue.textContent = config.gameStatus.score;
+  config.gameStatus.lifeValue.textContent = config.gameStatus.lifes;
+  config.ballDive.style.transform = `translate3d(${config.ball.x}px, ${config.ball.y}px,0)`;
+  config.paddleDive.style.transform = `translate3d(${config.paddle.x}px, ${config.paddle.y}px, 0)`;
 }
 
 export function createBricks() {
@@ -61,7 +61,6 @@ export function createBricks() {
     }
   }
 }
-
 export function setupSizes() {
   config.paddle.width = config.cvs.width * 0.16;
   config.paddle.height = config.cvs.height * 0.04;
@@ -84,35 +83,4 @@ export function setupSizes() {
 export function updateGameAreaSize() {
   config.cvs.width = config.container.clientWidth;
   config.cvs.height = config.container.clientHeight;
-}
-export function updateBricks() {
-  let row = 0;
-  let col = -1;
-  console.log();
-  console.log(config.bricksPositions);
-
-  config.bricksContainer.innerHTML = "";
-  console.log(config.bricksPositions);
-
-  if (config.bricksPositions.length > 0) {
-    for (const b of config.bricksPositions) {
-      col++;
-      if (col >= 6) {
-        row++;
-        col = 0;
-      }
-      b.width = config.brick.width;
-      b.height = config.brick.height;
-      b.element.style.width = `${b.width}px`;
-      b.element.style.height = `${b.height}px`;
-      const x =
-        config.brick.gap + col * (config.brick.width + config.brick.gap);
-      const y =
-        config.brick.gap + row * (config.brick.height + config.brick.gap);
-      b.x = x;
-      b.y = y;
-      b.element.style.transform = `translate(${x}px, ${y}px)`;
-      config.bricksContainer.appendChild(b.element);
-    }
-  }
 }

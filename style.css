@@ -141,26 +141,6 @@ body {
   gap: 15px;
 }
 
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
-
-.pause-btn {
-  background: #e94560;
-  color: white;
-}
-
-.pause-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(233, 69, 96, 0.4);
-}
-
 .heart {
   color: #e94560;
   font-size: clamp(15px, 2vw, 18px);
@@ -182,11 +162,6 @@ body {
 .trophy {
   color: #f39c12;
   font-size: clamp(15px, 2vw, 18px);
-}
-
-.pause-icon {
-  font-size: clamp(10px, 2vw, 16px);
-  margin-right: 5px;
 }
 
 .game-message {
@@ -211,26 +186,6 @@ body {
   margin-top: 10px;
 }
 
-.brick-destroyed {
-  opacity: 0 !important;
-  transform: scale(0) !important;
-}
-
-.star {
-  position: absolute;
-  border-radius: 50%;
-  background-color: white;
-  opacity: 0.8;
-  animation: floatDown linear infinite;
-}
-
-.stars-background {
-  position: fixed;
-  z-index: -1;
-  width: 100vw;
-  height: 100vh;
-}
-
 @keyframes floatDown {
   from {
     transform: translateY(-10px);
@@ -244,20 +199,6 @@ body {
 
 .hidden {
   display: none;
-}
-
-
-.stars-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-image: url("images/_.gif");
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  z-index: -1;
 }
 
 .image {
