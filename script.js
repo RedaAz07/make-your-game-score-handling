@@ -173,6 +173,7 @@ function GameLoop() {
   config.introScreen.classList.add("image");
   config.gameContainer.style.filter = "blur(30px)";
   config.continueBtn.addEventListener("click", () => {
+    config.gameContainer.style.filter = "none";
     config.gameState.gameStart = true;
     config.gameState.gamePause = false;
     start();
@@ -205,6 +206,7 @@ function GameLoop() {
         clearAnimation();
         loop();
       } else if (config.gameState.gameStart && !config.gameState.gamePause) {
+        config.gameContainer.style.filter = "blur(30px)";
         config.gameState.gamePause = true;
         config.gameState.gameStart = false;
         clearAnimation();
@@ -216,6 +218,7 @@ function GameLoop() {
         !config.gameState.gameOver &&
         !config.gameState.gameWine
       ) {
+        config.gameContainer.style.filter = "none";
         config.gameState.gameStart = true;
         config.gameState.gamePause = false;
         start();
@@ -240,7 +243,7 @@ function GameLoop() {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
       Restart();
-    }, 200); // debounce delay in ms (adjust as needed)
+    }, 200);
   });
 }
 

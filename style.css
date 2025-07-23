@@ -108,26 +108,18 @@ body {
   margin-bottom: 20px;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+
+.score-lives {
   margin-bottom: 20px;
-  padding: 15px 20px;
+  padding: 15px 5px;
   background: #0f3460;
   border-radius: 15px;
   border: 2px solid #e94560;
-  gap: 5px;
-  flex-wrap: wrap;
-}
-
-.score-lives {
   display: flex;
-  gap: 5px;
+  justify-content: space-between;
   color: #fff;
-  font-size: clamp(12px, 2vw, 20px);
+  font-size: clamp(13px, 1vw, 20px);
   font-weight: bold;
-  flex-wrap: wrap;
 }
 
 .score,
@@ -135,7 +127,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 4px;
 }
 
 .score-value,
@@ -171,7 +163,7 @@ body {
 
 .heart {
   color: #e94560;
-  font-size: clamp(10px, 2vw, 25px);
+  font-size: clamp(15px, 2vw, 18px);
   animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -189,7 +181,7 @@ body {
 
 .trophy {
   color: #f39c12;
-  font-size: clamp(10px, 2vw, 25px);
+  font-size: clamp(15px, 2vw, 18px);
 }
 
 .pause-icon {
@@ -198,11 +190,13 @@ body {
 }
 
 .game-message {
+  padding: 20px;
   position: absolute;
+  color: white;
+  width: 300px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #fff;
   font-size: 24px;
   font-weight: bold;
   text-align: center;
@@ -274,8 +268,7 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 400px;
-  height: 400px;
+  width: 40%;
   border-radius: 15px;
   border: 1px solid #0f3460;
   z-index: 500;
@@ -298,21 +291,43 @@ p {
   margin: 20px 0;
 }
 
-.highlight {
-  color: #fdb827;
-}
-
-.heart {
-  color: #e74c3c;
-}
-
-.trophy {
-  color: gold;
-}
-
 .space-text {
   font-size: 28px;
   color: #fdb827;
   margin-top: 40px;
 }
 
+@media (max-width: 900px) {
+  .image {
+    width: 70%;
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+
+}
+
+@media (max-width: 500px) {
+  h1 {
+    font-size: 25px;
+  }
+}
+
+@media (max-width: 400px) {
+  h1 {
+    font-size: 18px;
+  }
+}
+
+#continueBtn ,#restartBtn{
+  font-size: 18px;
+  cursor: pointer;
+  margin: 2px 0;
+  background-color: rgb(26, 24, 24);
+  color: white;
+  border-radius: 12px;
+  border: 1px solid yellow;
+  width: 150px;
+  padding: 10px;
+}

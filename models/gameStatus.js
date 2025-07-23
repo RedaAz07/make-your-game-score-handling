@@ -26,7 +26,7 @@ export function gameOver() {
   config.gameState.gamePause = true;
 
   clearAnimation();
-  config.gameMessage.innerText = "💀 Game Over! Press Space to Restart";
+  config.gameMessage.innerText = "Game Over! \n Press Space to Restart";
   config.gameMessage.style.display = "block";
 
   // Stop timer
