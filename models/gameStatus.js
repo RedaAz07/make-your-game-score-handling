@@ -1,11 +1,10 @@
 import *  as config from "./config.js";
-import {clearAnimation  } from "./helpers.js";
+import { clearAnimation } from "./helpers.js";
 
 export function gameWin() {
   config.gameState.gameStart = false;
   config.gameState.gamePause = true;
-
-  config.gameMessage.innerText = "🎉 You Win! Press Space to Restart";
+  config.gameMessage.innerText = `You Win! Press Space to Restart\n your final score : ${config.gameStatus.score}`;
   config.gameMessage.style.display = "block";
   clearAnimation();
   clearInterval(config.time.interval);
@@ -26,7 +25,7 @@ export function gameOver() {
   config.gameState.gamePause = true;
 
   clearAnimation();
-  config.gameMessage.innerText = "Game Over! \n Press Space to Restart";
+  config.gameMessage.innerText = `Game Over! \n Press Space to Restart \n your final score : ${config.gameStatus.score}`;
   config.gameMessage.style.display = "block";
 
   // Stop timer
