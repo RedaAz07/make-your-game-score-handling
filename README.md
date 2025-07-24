@@ -39,13 +39,18 @@ git clone https://github.com/AhmedBaid/Full-Ecommerce-App
 2. Open `html.html` in your browser.
 3. Start playing!
 
+## or you can play it online
+No need to download anything — just click the link and start playing:
+
+👉 [click here to play](https://brick-breaker-abaid.netlify.app/)
+
 ---
 
 ## ⚙️ Technologies Used
 
 - HTML5
 - CSS3
-- JavaScript (Vanilla)
+- JavaScript
 
 ---
 
