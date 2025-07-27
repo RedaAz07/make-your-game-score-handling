@@ -16,6 +16,7 @@ export const lifeValue = document.querySelector(".lives-value");
 export const gameContainer = document.getElementById("content")
 
 
+
 // Game state
 export const gameState = {
   gameStart: false,

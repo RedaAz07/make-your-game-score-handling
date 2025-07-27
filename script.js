@@ -67,7 +67,7 @@ function update() {
       config.wait.status = false;
       clearAnimation();
       loop();
-    }, 1500);
+    }, 500);
     return;
   }
 
