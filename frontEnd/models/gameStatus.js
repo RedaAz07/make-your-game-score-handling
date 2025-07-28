@@ -11,6 +11,8 @@ export function gameWin() {
   clearAnimation();
   clearInterval(config.time.interval);
   config.time.interval = null;
+  ScoreHandler()
+
 }
 
 export function start() {

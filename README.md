@@ -16,16 +16,16 @@ Welcome to **Brick Bricker** — a classic arcade-style game made with HTML, CSS
 make-your-game/
 │
 ├── models/
-│   ├── ball.js         // كلاس الكرة: الحجم، السرعة، الحركة، التصادم
-│   ├── config.js       // إعدادات اللعبة (الأبعاد، السرعة، الألوان...)
-│   ├── gameStatus.js   // التحكم في حالة اللعبة (تشغيل، توقف، خسارة...)
-│   ├── helpers.js      // دوال مساعدة (مثلاً حساب التصادم)
-│   └── paddle.js       // كلاس paddle: التحكم في الحركة و التصادم
+│   ├── ball.js         
+│   ├── config.js       
+│   ├── gameStatus.js   
+│   ├── helpers.js      
+│   └── paddle.js       
 │
-├── html.html           // واجهة HTML الرئيسية
-├── script.js           // السكريبت الرئيسي لي كيربط العناصر ويدير منطق اللعبة
-├── style.css           // تنسيقات CSS لتجميل الواجهة
-└── README.md           // هاد الملف: شرح المشروع
+├── html.html           
+├── script.js           
+├── style.css           
+└── README.md           
 ```
 
 ---

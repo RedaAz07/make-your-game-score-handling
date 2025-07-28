@@ -8,6 +8,7 @@ import {
   updateGameAreaSize,
   setupSizes,
   createBricks,
+  
 } from "./models/helpers.js";
 import {
   Pause,
@@ -16,7 +17,6 @@ import {
   gameOver,
   gameWin,
 } from "./models/gameStatus.js";
-
 function loop() {
   if (!config.gameState.gameStart && !config.wait.status) return;
   if (config.gameState.gameStart && !config.wait.status) {
@@ -67,7 +67,7 @@ function update() {
       config.wait.status = false;
       clearAnimation();
       loop();
-    }, 500);
+    }, 50);
     return;
   }
 
@@ -170,7 +170,7 @@ function update() {
 }
 
 function GameLoop() {
-  config.introScreen.classList.add("image");
+ config.introScreen.classList.add("image");
   config.gameContainer.style.opacity = "0";
   config.continueBtn.addEventListener("click", () => {
     config.gameContainer.style.opacity = "1";
@@ -245,7 +245,7 @@ function GameLoop() {
     resizeTimeout = setTimeout(() => {
       Restart();
     }, 200);
-  });
+  }); 
 }
 
 GameLoop();

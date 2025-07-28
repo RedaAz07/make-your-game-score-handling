@@ -30,7 +30,6 @@ body {
   background: #0f3460;
   border-radius: 15px;
   border: 3px solid #e94560;
-  overflow: hidden;
 }
 
 .bricks-container {
@@ -261,7 +260,8 @@ p {
   }
 }
 
-#continueBtn ,#restartBtn{
+#continueBtn,
+#restartBtn {
   font-size: 18px;
   cursor: pointer;
   margin: 2px 0;
@@ -271,4 +271,41 @@ p {
   border: 1px solid yellow;
   width: 150px;
   padding: 10px;
+}
+
+/* Scoreboard*/
+table {
+  width: 100%;
+  border-collapse: collapse;
+  color: white;
+}
+
+table tr {
+  border-bottom: 1px solid red;
+}
+
+table tr th {
+  padding: 10px;
+}
+
+table tr td {
+  padding: 10px;
+  text-align: center;
+}
+
+#scorboarddiv {
+  background-color: black;
+  border: 3px solid red;
+  color: white;
+  padding: 20px;
+  width: 80%;
+  max-width: 600px;
+  margin: 50px auto;
+  text-align: center;
+  border-radius: 10px;
+  font-family: Arial, sans-serif;
+}
+
+#scorboarddiv h2 {
+  color: red;
 }

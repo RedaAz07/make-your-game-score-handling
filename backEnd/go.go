@@ -1,4 +1,6 @@
 package main
+/*
+package main
 
 import (
 	"encoding/json"
@@ -17,7 +19,7 @@ type Score struct {
 
 var (
 	Scores   []Score
-	fileName = "../data/scores.json"
+	fileName = "scores.json"
 )
 
 func ReadData(name string) error {
@@ -58,11 +60,13 @@ func saveData(name string, key Score) error {
 }
 
 // to handle the CORS Problem
+func enableCors(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "http://127.0.0.1:5500")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+}
 
 func main() {
-	fs := http.FileServer(http.Dir("../frontEnd"))
-	http.Handle("/", fs)
-
 	http.HandleFunc("/addScore", addScore)
 	http.HandleFunc("/scores", allScores)
 
@@ -72,10 +76,7 @@ func main() {
 
 // handler of the add posts
 func addScore(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method == http.MethodOptions {
-		return
-	}
+	enableCors(w)
 
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -101,12 +102,18 @@ func addScore(w http.ResponseWriter, r *http.Request) {
 
 // get all the data
 func allScores(w http.ResponseWriter, r *http.Request) {
-	err := ReadData(fileName)
-	if err != nil {
+
+	
+	err :=  ReadData(fileName)
+	if err!=  nil   {
 		http.Error(w, "Error in reading the data", http.StatusInternalServerError)
 		return
 	}
+	enableCors(w)
 
+	if r.Method == http.MethodOptions {
+		return
+	}
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
@@ -114,3 +121,5 @@ func allScores(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(Scores)
 }
+
+ */
