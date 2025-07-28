@@ -1,20 +1,69 @@
 import * as config from "./config.js";
-export function ScoreHandler() {
+
+// pagination control
+let start = 0;
+let end = 5;
+let next = 5;
+let fullData = [];
+
+const content = document.getElementById("content"); // تأكد أن عندك div فيه id="content"
+
+// 🧠 Main handler
+export function ScoreHandler(value) {
   content.innerHTML = `
-    <div >
-      write ur name : <input type="text" id="input">
-      <button id="inputbutton" type="button">click</button>
+    <div class="game-over-container">
+        <h1 class="game-over-title">${value}</h1>
+        <div class="score-display">
+            <div class="score-label">YOUR SCORE</div>
+            <div class="current-score" id="currentScore">${config.gameStatus.score}</div>
+        </div>
+        <div class="save-score-section">
+            <div class="save-title">💾 Save Your Score</div>
+            <div class="input-container">
+                <input type="text" class="username-input" id="usernameInput" placeholder="Enter your username" maxlength="20">
+                <button class="save-button" id="inputbutton">SAVE</button>
+            </div>
+            <div class="high-scores">
+                <div class="scores-title">🏆 HIGH SCORES</div>
+                <div class="scores-list" id="scoresList">
+                    <!-- Scores will be populated here -->
+                </div>
+                <div class="pagination-controls">
+                    <button class="pagination-btn" id="prevBtn">« PREV</button>
+                    <div class="pagination-info" id="paginationInfo">${Math.floor(start / next) + 1}</div>
+                    <button class="pagination-btn" id="nextBtn">NEXT »</button>
+                </div>
+            </div>
+        </div>
+        <div class="restart-info">
+            Press <span class="restart-key">SPACE</span> to restart the game
+        </div>
     </div>
   `;
 
-  const input = document.getElementById("input");
+  const input = document.getElementById("usernameInput");
   const inputbutton = document.getElementById("inputbutton");
+
   inputbutton.addEventListener("click", () => {
-    if (input.value.length <= 0) {
-      return
-    }
-    postData(input);
+    if (input.value.trim() === "") return;
+    postData(input).then(() => {
+      start = 0; // رجعنا للبداية
+      end = 5;
+      getDAta();
+    });
   });
+
+  // ✅ أحداث التنقل بين الصفحات
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    nextt();
+  });
+
+  document.getElementById("prevBtn").addEventListener("click", () => {
+    prevt();
+  });
+
+  // ✅ أول تحميل
+  getDAta();
 }
 
 export async function postData(input) {
@@ -25,79 +74,56 @@ export async function postData(input) {
   };
 
   try {
-    let res = await fetch("http://localhost:8080/addScore", {
+    await fetch("http://localhost:8080/addScore", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(data)
     });
-
-    await getDAta(); // refresh scoreboard
   } catch (error) {
-    console.log(error);
+    console.log("Post error:", error);
   }
 }
 
-// pagination control
-let start = 0;
-let end = 5;
-let next = 5
-let fullData = []; // store full scoreboard data
-
-function reload(data) {
-  // store data globally for pagination
- fullData = data.sort((a, b) => {
-  if (a.score !== b.score) {
-    return b.score - a.score; 
-  } else {
-    const timeA = Number(a.time.replace(":", ""));
-    const timeB = Number(b.time.replace(":", ""));
-    return timeA - timeB; 
+export async function getDAta() {
+  try {
+    let res = await fetch("http://localhost:8080/scores");
+    let data = await res.json();
+    await reload(data);
+  } catch (error) {
+    console.log("Fetch error:", error);
   }
-});
+}
+
+async function reload(data) {
+  fullData = data.sort((a, b) => {
+    if (a.score !== b.score) {
+      return b.score - a.score;
+    } else {
+      const timeA = Number(a.time.replace(":", ""));
+      const timeB = Number(b.time.replace(":", ""));
+      return timeA - timeB;
+    }
+  });
 
   const sliced = fullData.slice(start, end);
-
-  let tableHTML = `
-    <table >
-      <tr style="">
-        <th >Ranc</th>
-        <th >Name</th>
-        <th >Score</th>
-        <th >Time</th>
-      </tr>
-  `;
+  const scoresList = document.getElementById("scoresList");
+  scoresList.innerHTML = ""; // مسح القديم
 
   sliced.forEach((score, index) => {
-    tableHTML += `
-      <tr>
-        <td >${start + index + 1}</td>
-        <td >${score.name}</td>
-        <td >${score.score}</td>
-        <td >${score.time}</td>
-      </tr>
+    const scoreItem = document.createElement("div");
+    scoreItem.className = "score-item";
+    scoreItem.innerHTML = `
+      <span class="score-rank">#${start + index + 1}</span>
+      <span class="score-name">${score.name}</span>
+      <span class="score-points">${score.score.toLocaleString()}</span>|
+      <span >${score.time}</span>
     `;
+    scoresList.appendChild(scoreItem);
   });
 
-  tableHTML += `</table>`;
-
-  document.body.innerHTML = `
-    <div id="scorboarddiv" >
-      <h2 >🏆 Scoreboard</h2>
-      ${tableHTML}
-      <button id="prev"><<</button>
-      <span id="current">${Math.floor(start / next) + 1}</span>
-      <button id="next">>></button>
-    </div>
-  `;
-  document.getElementById("next").addEventListener("click", () => {
-    nextt();
-  });
-
-  document.getElementById("prev").addEventListener("click", () => {
-    prevt();
-  });
+  document.getElementById("paginationInfo").innerText = Math.floor(start / next) + 1;
 }
 
 function nextt() {
@@ -113,15 +139,5 @@ function prevt() {
     end = start;
     start -= next;
     reload(fullData);
-  }
-}
-
-export async function getDAta() {
-  try {
-    let res = await fetch("http://localhost:8080/scores");
-    let data = await res.json();
-    reload(data);
-  } catch (error) {
-    console.log(error);
   }
 }

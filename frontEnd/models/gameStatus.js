@@ -4,14 +4,14 @@ import { ScoreHandler } from "./score.js";
 
 
 export function gameWin() {
-  config.gameState.gameStart = false;
+
+   config.gameState.gameStart = false;
   config.gameState.gamePause = true;
-  config.gameMessage.innerText = `You Win! Press Space to Restart\n your final score : ${config.gameStatus.score}`;
-  config.gameMessage.style.display = "block";
   clearAnimation();
   clearInterval(config.time.interval);
   config.time.interval = null;
-  ScoreHandler()
+  config.gameContainer.style.opacity = "0,3";  
+  ScoreHandler("Game Win")
 
 }
 
@@ -29,13 +29,13 @@ export function gameOver() {
   config.gameState.gamePause = true;
 
   clearAnimation();
-  /*   config.gameMessage.innerText = `Game Over! \n Press Space to Restart \n your final score : ${config.gameStatus.score}`;
-    config.gameMessage.style.display = "block"; */
+ 
 
   // Stop timer
   clearInterval(config.time.interval);
   config.time.interval = null;
-  ScoreHandler()
+  ScoreHandler("Game Over")
+
 }
 
 
