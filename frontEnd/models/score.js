@@ -59,7 +59,6 @@ export function ScoreHandler(value) {
       postData(input).then(() => {
         start = 0
         end = 5;
-        getDAta();
       });
       input.value = ""
       ctr++
@@ -89,6 +88,20 @@ export function ScoreHandler(value) {
   });
 
   getDAta();
+ 
+const socket = new WebSocket("ws://localhost:8080/ws");
+socket.onmessage = (event) => {
+  try {
+    const data = JSON.parse(event.data);
+    start = 0;
+    end = 5;
+    reload(data);
+  } catch (e) {
+    console.error("Invalid data from WebSocket:", e);
+  }
+};
+
+
 }
 
 export async function postData(input) {

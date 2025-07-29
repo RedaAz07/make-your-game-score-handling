@@ -7,7 +7,59 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/websocket"
 )
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+var (
+	clients   = make(map[*websocket.Conn]bool) // all connected clients
+	broadcast = make(chan []Score)             // broadcast channel
+)
+
+func handleBroadcast() {
+	for {
+		updatedScores := <-broadcast
+		for client := range clients {
+			err := client.WriteJSON(updatedScores)
+			if err != nil {
+				log.Printf("WebSocket error: %v", err)
+				client.Close()
+				delete(clients, client)
+			}
+		}
+	}
+}
+
+func reader(conn *websocket.Conn) {
+	for {
+		_, _, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Client disconnected:", err)
+			delete(clients, conn)
+			conn.Close()
+			break
+		}
+	}
+}
+
+func ws(w http.ResponseWriter, r *http.Request) {
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+	}
+		clients[conn] = true
+
+	if err := conn.WriteJSON(Scores); err != nil {
+		log.Println("Initial send error:", err)
+	}
+	go reader(conn)
+}
 
 type Score struct {
 	Name  string `json:"name"`
@@ -60,9 +112,10 @@ func saveData(name string, key Score) error {
 // to handle the CORS Problem
 
 func main() {
+	go handleBroadcast()
 	fs := http.FileServer(http.Dir("../frontEnd"))
 	http.Handle("/", fs)
-
+	http.HandleFunc("/ws", ws)
 	http.HandleFunc("/addScore", addScore)
 	http.HandleFunc("/scores", allScores)
 
@@ -92,7 +145,6 @@ func addScore(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "username must be more than 3  charts", http.StatusBadRequest)
 		return
 	}
-	
 
 	err := saveData(fileName, s)
 	if err != nil {
@@ -100,6 +152,7 @@ func addScore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	broadcast <- Scores
 	json.NewEncoder(w).Encode(Scores)
 }
 
