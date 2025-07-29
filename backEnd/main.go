@@ -72,7 +72,6 @@ func main() {
 
 // handler of the add posts
 func addScore(w http.ResponseWriter, r *http.Request) {
-
 	if r.Method == http.MethodOptions {
 		return
 	}
@@ -89,6 +88,11 @@ func addScore(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid data", http.StatusBadRequest)
 		return
 	}
+	if len(s.Name) <= 3 {
+		http.Error(w, "username must be more than 3  charts", http.StatusBadRequest)
+		return
+	}
+	
 
 	err := saveData(fileName, s)
 	if err != nil {

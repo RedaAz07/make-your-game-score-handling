@@ -289,18 +289,9 @@ p {
   justify-content: center;
   z-index: 1000;
   font-family: 'Orbitron', monospace;
-  animation: fadeIn 0.5s ease-out;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
 
-  to {
-    opacity: 1;
-  }
-}
 
 /* Main Container */
 .game-over-container {
@@ -316,42 +307,8 @@ p {
   animation: slideIn 0.6s ease-out;
 }
 
-@keyframes slideIn {
-  from {
-    transform: translateY(-50px) scale(0.9);
-    opacity: 0;
-  }
 
-  to {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-}
 
-/* Decorative border effect */
-.game-over-container::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24);
-  border-radius: 22px;
-  z-index: -1;
-  animation: rotateBorder 3s linear infinite;
-  opacity: 0.7;
-}
-
-@keyframes rotateBorder {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
 
 /* Game Over Title */
 .game-over-title {
@@ -584,26 +541,7 @@ p {
   margin: 0 3px;
 }
 
-/* Scrollbar styling for scores list */
-.scores-list::-webkit-scrollbar {
-  width: 6px;
-}
 
-.scores-list::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-.scores-list::-webkit-scrollbar-thumb {
-  background: rgba(78, 205, 196, 0.5);
-  border-radius: 3px;
-}
-
-.scores-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(78, 205, 196, 0.7);
-}
-
-/* Responsive Design */
 @media (max-width: 600px) {
   .game-over-container {
     padding: 30px 20px;
@@ -625,4 +563,9 @@ p {
   .save-button {
     width: 100%;
   }
+}
+
+
+#error{
+  color:  red;
 }

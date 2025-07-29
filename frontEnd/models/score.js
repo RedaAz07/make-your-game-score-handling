@@ -5,12 +5,12 @@ let start = 0;
 let end = 5;
 let next = 5;
 let fullData = [];
+let  errorspa = null
+const content = document.getElementById("content");
 
-const content = document.getElementById("content"); // تأكد أن عندك div فيه id="content"
-
-// 🧠 Main handler
+//  Main handler
 export function ScoreHandler(value) {
-  content.innerHTML = `
+  document.body.innerHTML = `
     <div class="game-over-container">
         <h1 class="game-over-title">${value}</h1>
         <div class="score-display">
@@ -23,6 +23,7 @@ export function ScoreHandler(value) {
                 <input type="text" class="username-input" id="usernameInput" placeholder="Enter your username" maxlength="20">
                 <button class="save-button" id="inputbutton">SAVE</button>
             </div>
+            <span id="error"></span>
             <div class="high-scores">
                 <div class="scores-title">🏆 HIGH SCORES</div>
                 <div class="scores-list" id="scoresList">
@@ -44,25 +45,49 @@ export function ScoreHandler(value) {
   const input = document.getElementById("usernameInput");
   const inputbutton = document.getElementById("inputbutton");
 
+  errorspa = document.getElementById("error")
+  let ctr = 0
   inputbutton.addEventListener("click", () => {
-    if (input.value.trim() === "") return;
-    postData(input).then(() => {
-      start = 0; // رجعنا للبداية
-      end = 5;
-      getDAta();
-    });
+
+    if (ctr >= 1) {
+      return
+    }
+    if (input.value.trim() === "" || input.value.length <= 3) {
+      errorspa.innerHTML = "your username must be more that 3 charts"
+    } else {
+      errorspa.innerHTML = ""
+      postData(input).then(() => {
+        start = 0
+        end = 5;
+        getDAta();
+      });
+      input.value = ""
+      ctr++
+      inputbutton.disabled = true
+    }
   });
 
-  // ✅ أحداث التنقل بين الصفحات
+
   document.getElementById("nextBtn").addEventListener("click", () => {
+    console.log("next");
+
+    if (fullData.length <= 5) {
+      document.getElementById("nextBtn").disabled = true
+      return
+    }
     nextt();
   });
 
   document.getElementById("prevBtn").addEventListener("click", () => {
+    console.log("prev");
+
+    if (fullData.length <= 5) {
+      document.getElementById("prevBtn").disabled = true
+      return
+    }
     prevt();
   });
 
-  // ✅ أول تحميل
   getDAta();
 }
 
@@ -74,25 +99,33 @@ export async function postData(input) {
   };
 
   try {
-    await fetch("http://localhost:8080/addScore", {
+    let res = await fetch("http://localhost:8080/addScore", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(data)
     });
+    if (!res.ok) {
+      let errmsg = await res.text()
+      throw new Error(errmsg);
+    }
   } catch (error) {
-    console.log("Post error:", error);
+    errorspa.innerHTML = error
   }
 }
 
 export async function getDAta() {
   try {
     let res = await fetch("http://localhost:8080/scores");
+    if (!res.ok) {
+      let errmsg = await res.text()
+      throw new Error(errmsg);
+    }
     let data = await res.json();
     await reload(data);
   } catch (error) {
-    console.log("Fetch error:", error);
+    errorspa.innerHTML = error
   }
 }
 
@@ -109,7 +142,7 @@ async function reload(data) {
 
   const sliced = fullData.slice(start, end);
   const scoresList = document.getElementById("scoresList");
-  scoresList.innerHTML = ""; // مسح القديم
+  scoresList.innerHTML = "";
 
   sliced.forEach((score, index) => {
     const scoreItem = document.createElement("div");
