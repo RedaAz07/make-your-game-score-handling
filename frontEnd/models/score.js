@@ -5,7 +5,7 @@ let start = 0;
 let end = 5;
 let next = 5;
 let fullData = [];
-let  errorspa = null
+let errorspa = null
 const content = document.getElementById("content");
 
 //  Main handler
@@ -47,13 +47,25 @@ export function ScoreHandler(value) {
 
   errorspa = document.getElementById("error")
   let ctr = 0
+  let alrady = false
+
   inputbutton.addEventListener("click", () => {
 
     if (ctr >= 1) {
       return
     }
-    if (input.value.trim() === "" || input.value.length <= 3) {
+
+    fullData.forEach((e) => {
+      if (e.name = input.value) {
+        alrady = true
+      }
+    })
+
+    if (input.value.trim() === "" || input.value.length <= 3 || input.value.length >10) {
       errorspa.innerHTML = "your username must be more that 3 charts"
+    } else if (alrady) {
+      errorspa.innerHTML = `${input.value} is already used `
+
     } else {
       errorspa.innerHTML = ""
       postData(input).then(() => {
@@ -88,18 +100,18 @@ export function ScoreHandler(value) {
   });
 
   getDAta();
- 
-const socket = new WebSocket("ws://localhost:8080/ws");
-socket.onmessage = (event) => {
-  try {
-    const data = JSON.parse(event.data);
-    start = 0;
-    end = 5;
-    reload(data);
-  } catch (e) {
-    console.error("Invalid data from WebSocket:", e);
-  }
-};
+
+  const socket = new WebSocket("ws://localhost:8080/ws");
+  socket.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      start = 0;
+      end = 5;
+      reload(data);
+    } catch (e) {
+      console.error("Invalid data from WebSocket:", e);
+    }
+  };
 
 
 }
