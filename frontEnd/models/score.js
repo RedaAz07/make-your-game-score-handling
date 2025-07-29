@@ -47,7 +47,6 @@ export function ScoreHandler(value) {
 
   errorspa = document.getElementById("error")
   let ctr = 0
-  let alrady = false
 
   inputbutton.addEventListener("click", () => {
 
@@ -55,18 +54,11 @@ export function ScoreHandler(value) {
       return
     }
 
-    fullData.forEach((e) => {
-      if (e.name = input.value) {
-        alrady = true
-      }
-    })
+   
 
-    if (input.value.trim() === "" || input.value.length <= 3 || input.value.length >10) {
+    if (input.value.trim() === "" || input.value.length <= 3 || input.value.length > 10) {
       errorspa.innerHTML = "your username must be more that 3 charts"
-    } else if (alrady) {
-      errorspa.innerHTML = `${input.value} is already used `
-
-    } else {
+    }else {
       errorspa.innerHTML = ""
       postData(input).then(() => {
         start = 0
