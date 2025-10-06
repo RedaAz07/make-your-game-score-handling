@@ -1,6 +1,6 @@
-import * as config from "./models/config.js";
-import { movePaddle, setupInput } from "./models/paddel.js";
-import { resetBall } from "./models/ball.js";
+import * as config from "../models/config.js";
+import { movePaddle, setupInput } from "../models/paddel.js";
+import { resetBall } from "../models/ball.js";
 import {
   draw,
   clearAnimation,
@@ -9,14 +9,14 @@ import {
   setupSizes,
   createBricks,
   
-} from "./models/helpers.js";
+} from "../models/helpers.js";
 import {
   Pause,
   start,
   Restart,
   gameOver,
   gameWin,
-} from "./models/gameStatus.js";
+} from "../models/gameStatus.js";
 function loop() {
   if (!config.gameState.gameStart && !config.wait.status) return;
   if (config.gameState.gameStart && !config.wait.status) {
