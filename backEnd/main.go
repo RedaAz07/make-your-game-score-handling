@@ -11,9 +11,9 @@ import (
 // to handle the CORS Problem
 
 func main() {
-fs := http.FileServer(http.Dir("../frontEnd/static"))
-http.Handle("/static/", http.StripPrefix("/static/", fs))
-
+	fs := http.FileServer(http.Dir("frontEnd/static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	http.Handle("/", http.FileServer(http.Dir("frontEnd")))
 	http.HandleFunc("/addScore", handlers.AddScore)
 	http.HandleFunc("/scores", handlers.GetScores)
 
